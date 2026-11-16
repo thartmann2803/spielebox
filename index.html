@@ -894,11 +894,11 @@ table.stat { border-collapse: collapse; width: 100%; }
             <div class="hand"><span class="pc">×3</span></div>
           </div>
           <div class="move">
-            <div><h3>Schieben</h3><p>Du tauschst nichts. Der Nächste ist dran.</p></div>
+            <div><h3>Schieben</h3><p>Du tauschst nichts und klopfst kurz auf den Tisch, wie beim Check im Poker. Der Nächste ist dran.</p></div>
             <div class="hand"><span class="pc">→</span></div>
           </div>
           <div class="move">
-            <div><h3>Klopfen</h3><p>Du klopfst auf den Tisch. Alle anderen haben noch genau einen Zug, dann werden alle Karten aufgedeckt. Klopfen ist dein ganzer Zug.</p></div>
+            <div><h3>Zumachen</h3><p>Du sagst „Ich mache zu“ und beendest damit die Runde. Alle anderen haben noch genau einen Zug, dann werden alle Karten aufgedeckt. Zumachen ist dein ganzer Zug.</p></div>
             <div class="hand"><span class="pc">✊</span></div>
           </div>
         </div>
@@ -908,9 +908,10 @@ table.stat { border-collapse: collapse; width: 100%; }
       <div class="section roomy">
         <h2>Ende der Runde</h2>
         <ol class="steps">
-          <li><span><strong>Klopfen:</strong> Alle anderen bekommen noch einen Zug, dann wird aufgedeckt.</span></li>
+          <li><span><strong>Zumachen:</strong> Alle anderen bekommen noch einen Zug, dann wird aufgedeckt.</span></li>
           <li><span><strong>31 Punkte:</strong> Wer 31 hat, deckt sofort auf, auch gleich beim Austeilen. Die Runde ist damit zu Ende.</span></li>
-          <li><span><strong>Alle schieben:</strong> Haben alle nacheinander geschoben, kommen die drei Karten in der Mitte weg und es werden drei neue vom Stapel aufgedeckt.</span></li>
+          <li><span><strong>Alle schieben:</strong> Haben alle nacheinander geschoben, kommen die drei Karten in der Mitte weg und es werden drei neue vom Stapel aufgedeckt. Dann geht es mit demselben Spieler weiter, der als Erster geschoben hat.</span></li>
+          <li><span><strong>Zumachen als Schieben:</strong> Haben alle vor dir geschoben und du würdest als Letzter zumachen, zählt das auch als Schieben. Beispiel bei drei Spielern: Zwei schieben, der Dritte macht zu. Die Runde ist dann nicht zu Ende, es kommen drei neue Karten in die Mitte und der Erste ist wieder dran.</span></li>
         </ol>
       </div>
 
@@ -944,8 +945,8 @@ table.stat { border-collapse: collapse; width: 100%; }
             </div>
           </details>
           <details>
-            <summary>Darf ich nach dem Klopfen noch tauschen?</summary>
-            <div class="ans"><p>Nein. Wer geklopft hat, wartet ab. Alle anderen haben noch genau einen Zug, dann wird aufgedeckt.</p></div>
+            <summary>Darf ich nach dem Zumachen noch tauschen?</summary>
+            <div class="ans"><p>Nein. Wer zugemacht hat, wartet ab. Alle anderen haben noch genau einen Zug, dann wird aufgedeckt.</p></div>
           </details>
           <details>
             <summary>Wie viele Spieler können mitspielen?</summary>
@@ -1049,15 +1050,16 @@ table.stat { border-collapse: collapse; width: 100%; }
 
       <div class="section">
         <h2>Wer fängt an?</h2>
-        <p>Es beginnt, wer eine <strong>3</strong> hat, offen oder in der Hand. Hat niemand eine 3, kommt die 4 an die Reihe, dann die 5 und so weiter. Der Spieler legt die Karte offen in die Mitte. Das ist der Ablagestapel.</p>
+        <p>Es beginnt, wer eine <strong>4</strong> hat, offen oder in der Hand. Die 3 zählt nicht, sie ist eine Sonderkarte. Hat niemand eine 4, kommt die 5 an die Reihe, dann die 6 und so weiter. Der Spieler legt die Karte offen in die Mitte. Das ist der Ablagestapel.</p>
       </div>
 
       <div class="section roomy">
         <h2>Dein Zug</h2>
-        <p>Es geht reihum nach links. Die Karten sind von niedrig nach hoch geordnet:</p>
+        <p>Es geht reihum nach links. Die normalen Karten sind von niedrig nach hoch geordnet:</p>
         <div class="hand">
-          <span class="pc">3<i>♠</i></span><span class="pc r">4<i>♥</i></span><span class="pc">…</span><span class="pc">10<i>♣</i></span><span class="pc r">B<i>♦</i></span><span class="pc">D<i>♠</i></span><span class="pc r">K<i>♥</i></span><span class="pc r">A<i>♦</i></span>
+          <span class="pc">4<i>♠</i></span><span class="pc r">5<i>♥</i></span><span class="pc">…</span><span class="pc">9<i>♣</i></span><span class="pc r">B<i>♦</i></span><span class="pc">D<i>♠</i></span><span class="pc r">K<i>♥</i></span><span class="pc r">A<i>♦</i></span>
         </div>
+        <p class="note">Die 2, die 3 und die 10 stehen nicht in der Reihenfolge. Sie sind Sonderkarten und können immer gelegt werden.</p>
         <ol class="steps">
           <li><span><strong>Legen:</strong> Lege eine Karte oder mehrere Karten mit gleicher Zahl auf den Ablagestapel. Sie müssen <strong>gleich hoch oder höher</strong> sein als die oberste Karte. Nur wenn eine 7 die Richtung gewechselt hat, müssen sie gleich hoch oder niedriger sein.</span></li>
           <li><span><strong>Nachziehen:</strong> Ziehe vom Nachziehstapel nach, bis du wieder 3 Handkarten hast. Ist der Stapel leer, entfällt das.</span></li>
@@ -1071,7 +1073,7 @@ table.stat { border-collapse: collapse; width: 100%; }
         <div>
           <div class="vrow">
             <div class="chips"><span class="pc">2<i>♠</i></span></div>
-            <p><strong>Die 2</strong> darf auf jede Karte gelegt werden. Danach darf wieder jede Karte darauf gelegt werden. Sie setzt den Stapel quasi zurück.</p>
+            <p><strong>Die 2</strong> darf auf jede Karte gelegt werden. Sie setzt den Stapel auf null zurück: Danach darf wieder jede Karte darauf gelegt werden und es geht nach oben weiter. Auch eine Richtung, die eine 7 auf „runter“ gestellt hat, wird damit wieder auf „hoch“ gesetzt.</p>
           </div>
           <div class="vrow">
             <div class="chips"><span class="pc">9<i>♠</i></span><span class="pc r">9<i>♥</i></span><span class="pc r">9<i>♦</i></span><span class="pc">3<i>♣</i></span></div>
@@ -1079,7 +1081,7 @@ table.stat { border-collapse: collapse; width: 100%; }
           </div>
           <div class="vrow">
             <div class="chips"><span class="pc">7<i>♠</i></span><span class="arrow" aria-hidden="true">↓</span></div>
-            <p><strong>Die 7 wechselt die Richtung.</strong> Nach einer 7 muss die nächste Karte <strong>gleich hoch oder niedriger</strong> sein statt höher. Die Richtung bleibt so, bis wieder eine 7 gelegt wird oder der Stapel verbrannt wird. Jede 7 wechselt einmal: Bei einer ungeraden Zahl Siebenen geht es runter, bei einer geraden wieder hoch. Legst du zwei Siebenen auf einmal, geht es also runter und gleich wieder hoch. Die nächste Karte muss dann wieder höher sein.</p>
+            <p><strong>Die 7 wechselt die Richtung.</strong> Nach einer 7 muss die nächste Karte <strong>gleich hoch oder niedriger</strong> sein statt höher. Die Richtung bleibt so, bis wieder eine 7 gelegt wird, eine 2 den Stapel zurücksetzt oder der Stapel verbrannt wird. Jede 7 wechselt einmal: Bei einer ungeraden Zahl Siebenen geht es runter, bei einer geraden wieder hoch. Legst du zwei Siebenen auf einmal, geht es also runter und gleich wieder hoch. Die nächste Karte muss dann wieder höher sein.</p>
           </div>
           <div class="vrow">
             <div class="chips"><span class="pc">8<i>♠</i></span><span class="pc r">8<i>♥</i></span></div>
@@ -1123,7 +1125,7 @@ table.stat { border-collapse: collapse; width: 100%; }
           <details>
             <summary>Wie funktionieren mehrere Siebenen?</summary>
             <div class="ans">
-              <p>Jede 7 wechselt die Richtung einmal. Eine 7: runter. Zwei 7: runter und wieder hoch, also normal höher. Drei 7: runter. Auch eine 3, die eine 7 kopiert, wechselt die Richtung.</p>
+              <p>Jede 7 wechselt die Richtung einmal. Eine 7: runter. Zwei 7: runter und wieder hoch, also normal höher. Drei 7: runter. Auch eine 3, die eine 7 kopiert, wechselt die Richtung. Eine 2 setzt alles zurück: Danach geht es wieder nach oben.</p>
             </div>
           </details>
           <details>
