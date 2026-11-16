@@ -1,0 +1,2835 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unsere Spielebox</title>
+<meta name="description" content="Spielregeln, Punktetabellen und Statistik für unsere Familienspiele.">
+<meta name="theme-color" content="#f1f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1913" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Spielebox">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: eine ruhige Spalte mit grosser Schrift fuer den Spieltisch. Startseite = Kacheln, Spielseite = Reiter Regeln / Punkte, eigene Seite fuer Spieler mit Fotos. */
+:root {
+  --bg: #f1f5f2;
+  --surface: #ffffff;
+  --fg: #16221b;
+  --muted: #52625a;
+  --line: #d3ddd6;
+  --accent: #1f5c46;
+  --accent-fg: #ffffff;
+  --accent-soft: #dcebe2;
+  --win-soft: #d6eedf;
+  --good: #176b43;
+  --warn: #8f5200;
+  --danger: #a32a26;
+  --card-bg: #ffffff;
+  --card-fg: #16221b;
+  --card-red: #b3322e;
+  --card-edge: #b9c6bd;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1913;
+    --surface: #15251d;
+    --fg: #e6efe8;
+    --muted: #9fb3a7;
+    --line: #2b4036;
+    --accent: #66c99b;
+    --accent-fg: #08150e;
+    --accent-soft: #1b3829;
+    --win-soft: #1c3b2b;
+    --good: #73d7a3;
+    --warn: #f0b866;
+    --danger: #ff9b92;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1913;
+  --surface: #15251d;
+  --fg: #e6efe8;
+  --muted: #9fb3a7;
+  --line: #2b4036;
+  --accent: #66c99b;
+  --accent-fg: #08150e;
+  --accent-soft: #1b3829;
+  --win-soft: #1c3b2b;
+  --good: #73d7a3;
+  --warn: #f0b866;
+  --danger: #ff9b92;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  padding-block: 1.25rem 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 46rem; margin: 0 auto; }
+h1, h2, h3 {
+  font-family: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  line-height: 1.15;
+  text-wrap: balance;
+  margin: 0;
+}
+h1 { font-size: clamp(2.1rem, 7vw, 3rem); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 1.55rem; font-weight: 600; }
+h3 { font-size: 1.2rem; font-weight: 600; }
+p { margin: 0; max-width: 60ch; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.stack { display: flex; flex-direction: column; gap: 1.5rem; }
+.lede { color: var(--muted); }
+
+/* Profilbilder */
+.av {
+  flex: none; display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; overflow: hidden;
+  background: var(--accent-soft); color: var(--accent);
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 1.1rem; line-height: 1;
+}
+.av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.av.lg { width: 4.75rem; height: 4.75rem; font-size: 1.9rem; }
+.stackav { display: flex; align-items: center; min-height: 2.6rem; }
+.stackav .av { border: 2px solid var(--surface); box-sizing: content-box; }
+.stackav .av + .av { margin-left: -0.55rem; }
+
+/* Startseite */
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1rem; }
+.tile {
+  display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem;
+  min-height: 11.5rem; padding: 1.25rem; border-radius: 1rem;
+  background: var(--accent); color: var(--accent-fg); text-decoration: none;
+}
+.tile .suits { font-size: 1.9rem; letter-spacing: 0.35em; line-height: 1; }
+.tile .name { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 2rem; font-weight: 800; line-height: 1.1; }
+.tile .sub { font-size: 1rem; opacity: 0.92; }
+.tile.alt { background: var(--surface); color: var(--fg); border: 2px solid var(--line); }
+.tile.alt .sub { color: var(--muted); opacity: 1; }
+.tile.soon { background: transparent; color: var(--muted); border: 2px dashed var(--line); justify-content: center; }
+.tile.soon .name { font-size: 1.3rem; font-weight: 600; }
+
+/* Spielseite */
+.back { display: inline-flex; align-items: center; min-height: 3rem; font-weight: 700; text-decoration: none; }
+.tabs { display: flex; gap: 0.5rem; }
+.tabs a {
+  flex: 1; display: flex; align-items: center; justify-content: center; min-height: 3.25rem;
+  border: 2px solid var(--line); border-radius: 0.8rem; text-decoration: none; font-weight: 700;
+  color: var(--fg); background: var(--surface);
+}
+.tabs a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+
+/* Regeln */
+.adv {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem 1rem;
+  padding: 1rem 1.1rem; border: 2px solid var(--line); border-radius: 1rem; background: var(--surface);
+}
+.adv > div { flex: 1 1 15rem; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.adv p { color: var(--muted); font-size: 1rem; }
+.switch {
+  flex: none; display: inline-flex; align-items: center; gap: 0.6rem; min-height: 3rem; padding: 0.25rem 0.9rem 0.25rem 0.3rem;
+  border-radius: 999px; border: 2px solid var(--line); background: var(--bg); color: var(--fg);
+  font: inherit; font-weight: 700; cursor: pointer;
+}
+.switch .knob { width: 2rem; height: 2rem; border-radius: 50%; background: var(--muted); }
+.switch .lbl { min-width: 2.2rem; text-align: center; }
+.switch[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); padding: 0.25rem 0.3rem 0.25rem 0.9rem; }
+.switch[aria-checked="true"] .knob { background: var(--accent-fg); order: 2; }
+.limit {
+  display: flex; align-items: center; gap: 1rem; padding: 1rem 1.1rem;
+  background: var(--accent-soft); border-radius: 1rem;
+}
+.limit .num {
+  flex: none; display: grid; place-items: center; width: 4.2rem; height: 4.2rem; border-radius: 0.9rem;
+  background: var(--accent); color: var(--accent-fg);
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 2.6rem; font-weight: 800;
+}
+.pc {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 2.7rem; height: 3.5rem; padding: 0 0.3rem; line-height: 1.1;
+  background: var(--card-bg); color: var(--card-fg); border: 1.5px solid var(--card-edge); border-radius: 0.45rem;
+  font-weight: 700; font-size: 1.15rem;
+}
+.pc i { font-style: normal; font-size: 1.1rem; }
+.pc.r { color: var(--card-red); }
+.vrow { display: flex; align-items: center; gap: 1rem; padding-block: 0.7rem; border-top: 1px solid var(--line); }
+.vrow .chips { flex: none; width: 11.5rem; display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.vrow .chips .pc { min-width: 2.4rem; height: 3rem; font-size: 1rem; }
+.vrow p { min-width: 0; }
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 0.6rem; }
+ol.steps li { counter-increment: s; display: flex; gap: 0.8rem; align-items: baseline; }
+ol.steps li::before {
+  content: counter(s); flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%;
+  background: var(--accent); color: var(--accent-fg); font-weight: 700; font-size: 1rem;
+}
+.move { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.4rem 1rem; align-items: center; padding-block: 0.9rem; border-top: 1px solid var(--line); }
+.move p { color: var(--muted); }
+.move .tag {
+  display: inline-block; margin-left: 0.4rem; padding: 0.05rem 0.55rem; border-radius: 999px; vertical-align: middle;
+  background: var(--accent-soft); color: var(--accent); font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 0.85rem; font-weight: 700;
+}
+.hand { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+.hand .arrow { color: var(--muted); font-weight: 700; padding-inline: 0.15rem; }
+.section { display: flex; flex-direction: column; gap: 0.4rem; }
+
+/* Punktetabelle */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+table.score { border-collapse: collapse; width: 100%; }
+.score th, .score td { padding: 0.5rem 0.4rem; text-align: center; vertical-align: top; }
+.score thead th { border-bottom: 2px solid var(--line); padding-top: 0.75rem; }
+.score .rc { text-align: left; padding-left: 0.75rem; font-weight: 700; color: var(--muted); width: 1%; white-space: nowrap; }
+.ph { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; min-width: 5.2rem; }
+.ph .pn { font-weight: 700; font-size: 1rem; line-height: 1.2; max-width: 7rem; overflow-wrap: anywhere; }
+input.pts {
+  width: 100%; min-width: 4.5rem; font: inherit; font-size: 1.5rem; font-weight: 700; text-align: center;
+  padding: 0.35rem 0.2rem; border: 2px solid var(--line); border-radius: 0.6rem;
+  background: var(--bg); color: var(--fg); font-variant-numeric: tabular-nums; -moz-appearance: textfield;
+}
+input.pts::-webkit-outer-spin-button, input.pts::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.cellrow { display: flex; align-items: center; justify-content: center; gap: 0.35rem; margin-top: 0.35rem; min-height: 2.2rem; }
+button.caller {
+  font: inherit; font-size: 0.85rem; padding: 0.25rem 0.65rem; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--muted);
+}
+button.caller[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 700; }
+.check { visibility: hidden; color: var(--good); font-weight: 800; font-size: 1.1rem; }
+td.win { background: var(--win-soft); }
+td.win .check { visibility: visible; }
+td.win input.pts { border-color: var(--accent); }
+.statusrow td { padding: 0 0.75rem 0.6rem; text-align: left; border-bottom: 1px solid var(--line); }
+.statusin { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.95rem; color: var(--muted); min-height: 2rem; }
+.status.ok { color: var(--fg); font-weight: 700; }
+.status.warn { color: var(--warn); font-weight: 700; }
+tfoot th, tfoot td { font-weight: 800; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+tfoot tr:first-child th, tfoot tr:first-child td { border-top: 2px solid var(--line); }
+tfoot .rc { font-size: 1rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.btn {
+  min-height: 3.1rem; padding: 0.55rem 1.1rem; border-radius: 0.8rem; cursor: pointer;
+  font: inherit; font-weight: 700; border: 2px solid var(--accent); background: transparent; color: var(--accent);
+}
+.btn.primary { background: var(--accent); color: var(--accent-fg); }
+.btn.small { position: relative; display: inline-flex; align-items: center; min-height: 2.6rem; padding: 0.3rem 0.9rem; font-size: 1rem; }
+.btn:focus-within { outline: 3px solid var(--fg); outline-offset: 3px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+button.mini {
+  font: inherit; font-size: 0.88rem; min-height: 2rem; padding: 0.15rem 0.5rem; background: none; border: 0; cursor: pointer;
+  color: var(--muted); text-decoration: underline;
+}
+button.mini[data-armed="1"] { color: var(--danger); font-weight: 700; }
+.note { color: var(--muted); font-size: 0.95rem; }
+.picker { display: flex; flex-direction: column; gap: 0.8rem; padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.picker .opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.opt {
+  display: inline-flex; align-items: center; gap: 0.5rem; min-height: 3.1rem; padding: 0.25rem 1rem 0.25rem 0.3rem;
+  border: 2px solid var(--accent); border-radius: 999px; background: transparent; color: var(--fg); font: inherit; font-weight: 700; cursor: pointer;
+}
+
+.section.roomy { gap: 0.9rem; }
+.examples { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+.limit .num.wide { width: auto; min-width: 6.5rem; padding: 0 0.8rem; font-size: 1.7rem; white-space: nowrap; }
+.stand { min-height: 1.3rem; margin-top: 0.2rem; font-size: 0.85rem; line-height: 1.25; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stand.reset { color: var(--accent); font-weight: 700; }
+.banner { padding: 0.9rem 1rem; border: 2px solid var(--danger); border-radius: 1rem; background: var(--surface); font-weight: 700; }
+tfoot td.lose { color: var(--danger); }
+
+.faq details { border-top: 1px solid var(--line); }
+.faq details:last-child { border-bottom: 1px solid var(--line); }
+.faq summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.5rem; padding-block: 0.5rem;
+  font-weight: 700; cursor: pointer; list-style: none;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+"; flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent); font-size: 1.3rem; line-height: 1;
+}
+.faq details[open] summary::after { content: "–"; }
+.faq .ans { display: flex; flex-direction: column; gap: 0.7rem; padding: 0 0 1rem; }
+.take { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: 0.4rem 1rem; align-items: center; padding-block: 0.4rem; }
+.pc.ok { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.pc.no { opacity: 0.4; }
+
+/* Wuerfeln */
+.dc {
+  display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 0.5rem;
+  background: var(--card-bg); color: var(--card-fg); border: 1.5px solid var(--card-edge); font-size: 1.9rem; line-height: 1;
+}
+.dc.r { color: var(--card-red); }
+.vrow.dice .chips { width: auto; max-width: 17rem; align-items: center; }
+.chips .arrow { color: var(--muted); font-weight: 700; padding-inline: 0.15rem; }
+.adv .tag {
+  display: inline-block; margin-left: 0.4rem; padding: 0.05rem 0.55rem; border-radius: 999px; vertical-align: middle;
+  background: var(--accent-soft); color: var(--accent); font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 0.85rem; font-weight: 700;
+}
+table.bomb { border-collapse: collapse; width: 100%; }
+.bomb th, .bomb td { padding: 0.55rem 0.6rem; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); }
+.bomb thead th { border-top: 0; font-size: 0.9rem; color: var(--muted); }
+.bomb tbody th { text-align: left; }
+.banner.good { border-color: var(--accent); }
+tfoot td.top { color: var(--good); }
+tfoot .goal td { font-size: 1rem; color: var(--muted); }
+.note.ok { color: var(--good); font-weight: 700; }
+.note.warn { color: var(--warn); font-weight: 700; }
+.turn { display: flex; flex-direction: column; gap: 1rem; padding: 1.1rem; border: 2px solid var(--accent); border-radius: 1rem; background: var(--surface); }
+.turn h2 { font-size: 1.6rem; }
+.turn .thead { display: flex; align-items: center; gap: 1rem; }
+.turn .who-l { font-size: 0.9rem; color: var(--muted); }
+.tsum { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: flex-end; justify-content: space-between; }
+.tsum .lab { display: block; font-size: 0.95rem; color: var(--muted); }
+.tsum .big { display: block; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-size: 2.8rem; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.tsum .sub { display: block; font-size: 0.9rem; color: var(--muted); }
+.dleft .dice { display: flex; gap: 0.3rem; margin-top: 0.35rem; }
+.dleft .d { width: 1.5rem; height: 1.5rem; border-radius: 0.35rem; border: 2px solid var(--line); }
+.dleft .d.on { background: var(--accent); border-color: var(--accent); }
+.throws { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.throws li { display: flex; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; padding-block: 0.4rem; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.faces { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 0.6rem; }
+.face { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.6rem 0.7rem; border: 1.5px solid var(--line); border-radius: 0.8rem; background: var(--bg); }
+.face .ftop { display: flex; align-items: center; gap: 0.5rem; }
+.face .fg { font-size: 2rem; line-height: 1; }
+.face .fg.r { color: var(--card-red); }
+.face .fn { font-weight: 700; }
+.ctl { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
+button.step {
+  width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 2px solid var(--accent); background: transparent; color: var(--accent);
+  font: inherit; font-size: 1.5rem; font-weight: 700; line-height: 1; cursor: pointer;
+}
+button.step:disabled { opacity: 0.35; cursor: not-allowed; }
+.cnt { min-width: 1.5rem; text-align: center; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.fp { min-height: 1.3rem; font-size: 0.95rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.face.bad { border-color: var(--warn); }
+.face.bad .fp { color: var(--warn); font-weight: 700; }
+.opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.combo { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.manual summary { display: flex; align-items: center; min-height: 2.6rem; font-weight: 700; cursor: pointer; }
+.manual .row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end; padding-block: 0.5rem; }
+.manual label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.95rem; color: var(--muted); }
+.manual input { width: 8.5rem; font: inherit; font-size: 1.2rem; padding: 0.4rem 0.6rem; border: 2px solid var(--line); border-radius: 0.6rem; background: var(--bg); color: var(--fg); }
+
+.mvs { display: flex; gap: 0.3rem; }
+button.mv {
+  width: 2.3rem; height: 2.1rem; border-radius: 0.5rem; border: 1.5px solid var(--line); background: transparent;
+  color: var(--fg); font: inherit; font-size: 1.05rem; line-height: 1; cursor: pointer;
+}
+button.mv:disabled { opacity: 0.3; cursor: not-allowed; }
+.turn .lab { display: block; font-size: 0.95rem; color: var(--muted); }
+.pfield { display: flex; flex-direction: column; gap: 0.3rem; }
+.pfield .sub { font-size: 0.9rem; color: var(--muted); }
+input.pts.big { font-size: 2.4rem; padding: 0.5rem 0.6rem; max-width: 16rem; text-align: left; }
+.tot { font-weight: 700; }
+.dleft { display: flex; flex-direction: column; gap: 0.4rem; }
+.dleft .ctl { max-width: 12rem; }
+.bombgrid { display: grid; grid-template-columns: auto repeat(4, minmax(0, 1fr)); gap: 0.4rem; align-items: center; padding-block: 0.5rem; }
+.bombgrid .hd { font-size: 0.85rem; color: var(--muted); text-align: center; }
+button.bb {
+  min-height: 2.7rem; padding: 0.2rem 0.3rem; border-radius: 0.6rem; border: 2px solid var(--accent); background: transparent;
+  color: var(--accent); font: inherit; font-weight: 700; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+
+/* Spielerseite */
+.pcard {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.75rem 1rem; align-items: center;
+  padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface);
+}
+.pcard .body { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.pcard .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+input.pname {
+  width: 100%; font: inherit; font-size: 1.25rem; font-weight: 700; padding: 0.5rem 0.7rem;
+  border: 2px solid var(--line); border-radius: 0.7rem; background: var(--bg); color: var(--fg);
+}
+
+/* Kopfzeile */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 0.9rem; border-bottom: 1px solid var(--line); }
+.brand {
+  display: inline-flex; align-items: center; gap: 0.55rem; min-height: 3rem; text-decoration: none; color: var(--fg);
+  font-family: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 800; font-size: 1.3rem;
+}
+.brand .mark { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 0.7rem; background: var(--accent); color: var(--accent-fg); font-size: 1.3rem; line-height: 1; }
+.tools { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.iconbtn {
+  flex: none; display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; border: 2px solid var(--line);
+  background: var(--surface); color: var(--fg); text-decoration: none; font-weight: 800; font-size: 1.25rem; line-height: 1;
+}
+.iconbtn:hover { border-color: var(--accent); }
+.btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.btn.link { display: inline-flex; align-items: center; text-decoration: none; }
+
+/* Schwimmen */
+.cellrow.sw { flex-wrap: wrap; }
+button.caller.fire[aria-pressed="true"] { background: var(--warn); border-color: var(--warn); color: var(--accent-fg); }
+button.caller:disabled { opacity: 0.4; cursor: not-allowed; }
+td.dim { opacity: 0.55; }
+.stand.hl { color: var(--danger); font-size: 1rem; }
+.stand.hl.dead { color: var(--muted); }
+tfoot td.swim { color: var(--warn); }
+tfoot td.dead { color: var(--muted); }
+.dleft .lab { font-size: 0.95rem; color: var(--muted); }
+
+/* Kategorien und Spielinfos */
+.cat { display: flex; flex-direction: column; gap: 0.9rem; }
+.cat h2 { font-size: 1.35rem; }
+.tile .tbody { display: flex; flex-direction: column; gap: 0.2rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+.facts > span {
+  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.1rem 0.7rem; border: 1.5px solid currentColor; border-radius: 999px;
+  font-size: 0.9rem; font-weight: 700; line-height: 1.5;
+}
+.facts.plain > span { border-color: var(--line); background: var(--surface); color: var(--fg); }
+.iconbtn svg { display: block; }
+table.stat { border-collapse: collapse; width: 100%; }
+.stat th, .stat td { padding: 0.6rem 0.4rem; text-align: center; font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); }
+.stat thead th { border-top: 0; font-size: 0.9rem; color: var(--muted); }
+.stat tbody th { text-align: left; padding-left: 0.75rem; }
+.stat td.best { font-weight: 800; color: var(--good); }
+.hist { display: flex; flex-direction: column; }
+.hrow { display: flex; flex-direction: column; gap: 0.2rem; padding-block: 0.8rem; border-top: 1px solid var(--line); }
+.hrow .ht { display: flex; justify-content: space-between; gap: 0.2rem 0.8rem; flex-wrap: wrap; font-weight: 700; }
+.hrow .hd { color: var(--muted); font-size: 0.95rem; font-weight: 400; }
+.hrow .hm { color: var(--muted); font-size: 0.95rem; }
+
+@media (max-width: 26rem) { .brand { font-size: 1.15rem; } }
+@media (max-width: 34rem) {
+  .move { grid-template-columns: minmax(0, 1fr); }
+  .take { grid-template-columns: minmax(0, 1fr); }
+  .vrow { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .vrow .chips { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<main>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Zur Startseite"><span class="mark" aria-hidden="true">♠</span><span>Spielebox</span></a>
+    <div class="tools">
+      <a class="iconbtn" href="#statistik" aria-label="Statistik und Verlauf" title="Statistik"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 20v-9M12 20V4M19 20v-6"></path></svg></a>
+      <a class="iconbtn" href="#spieler" aria-label="Spieler auswählen" title="Spieler"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path></svg></a>
+      <a class="iconbtn" href="#hilfe" aria-label="Hilfe" title="Hilfe"><span aria-hidden="true">?</span></a>
+    </div>
+  </header>
+
+  <!-- STARTSEITE -->
+  <section id="view-home" class="stack">
+    <div class="section">
+      <h1>Unsere Spielebox</h1>
+      <p class="lede">Regeln nachschlagen und Punkte zählen, an einem Ort.</p>
+    </div>
+    <div class="cat">
+      <h2>Kartenspiele</h2>
+      <div class="tiles">
+        <a class="tile" href="#yassif">
+          <span class="suits" aria-hidden="true">♠ ♥ ♦ ♣</span>
+          <span class="tbody">
+            <span class="name">Yasif</span>
+            <span class="sub">Regeln und Punktetabelle</span>
+            <span class="facts"><span>Leicht <span aria-hidden="true">●○○</span></span><span>52 Karten</span></span>
+          </span>
+        </a>
+        <a class="tile" href="#schwimmen">
+          <span class="suits" aria-hidden="true">♥ ♥ ♥</span>
+          <span class="tbody">
+            <span class="name">Schwimmen</span>
+            <span class="sub">Regeln und Leben</span>
+            <span class="facts"><span>Leicht <span aria-hidden="true">●○○</span></span><span>32 Karten</span></span>
+          </span>
+        </a>
+        <a class="tile" href="#shithead">
+          <span class="suits" aria-hidden="true">2 ♣ 10</span>
+          <span class="tbody">
+            <span class="name">Shithead</span>
+            <span class="sub">Regeln und Wertung</span>
+            <span class="facts"><span>Mittel <span aria-hidden="true">●●○</span></span><span>52 Karten</span></span>
+          </span>
+        </a>
+      </div>
+    </div>
+    <div class="cat">
+      <h2>Würfelspiele</h2>
+      <div class="tiles">
+        <a class="tile" href="#wuerfeln">
+          <span class="suits" aria-hidden="true">⚀ ⚂ ⚄ ⚅</span>
+          <span class="tbody">
+            <span class="name">Würfeln</span>
+            <span class="sub">Regeln und Punkte</span>
+            <span class="facts"><span>Leicht <span aria-hidden="true">●○○</span></span><span>6 Würfel</span></span>
+          </span>
+        </a>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="tile soon">
+        <span class="name">Weitere Spiele</span>
+        <span class="sub">Hier kommen unsere anderen Spiele dazu.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- WUERFELN -->
+  <section id="view-dice" class="stack" hidden>
+    <a class="back" href="#">← Alle Spiele</a>
+    <div class="section">
+      <h1>Würfeln</h1>
+      <p class="lede">Würfelspiel mit 6 Würfeln, auch „10.000“ genannt. Wer 10.000 Punkte oder mehr erreicht, löst die letzte Runde aus.</p>
+      <div class="facts plain"><span>Leicht <span aria-hidden="true">●○○</span></span><span>6 Würfel</span><span>Keine Karten nötig</span></div>
+    </div>
+    <nav class="tabs" aria-label="Bereiche">
+      <a id="dtab-rules" href="#wuerfeln">Regeln</a>
+      <a id="dtab-score" href="#wuerfeln-punkte">Punkte</a>
+    </nav>
+
+    <div id="dpanel-rules" class="stack">
+      <div class="section">
+        <h2>Dein Zug</h2>
+        <p>Es geht reihum. Dein Zug dauert so lange, bis du aufhörst oder bei einem Wurf keine Punkte mehr bekommst.</p>
+        <ol class="steps">
+          <li><span>Würfle mit allen 6 Würfeln.</span></li>
+          <li><span>Lege mindestens einen Würfel beiseite, der Punkte bringt (siehe unten). Das darf auch nur eine einzelne 1 oder 5 sein. Ohne beiseitegelegten Würfel geht es nicht weiter.</span></li>
+          <li><span>Entscheide: Punkte aufschreiben und den Zug beenden, oder mit den übrigen Würfeln weiterwürfeln.</span></li>
+        </ol>
+      </div>
+      <div class="limit">
+        <span class="num" aria-hidden="true">0</span>
+        <p><strong>Verwürfelt:</strong> Bringt ein Wurf keine Punkte, bekommst du für diesen Zug 0 Punkte. Auch die Punkte aus früheren Würfen dieses Zuges sind weg. Der Nächste ist dran.</p>
+      </div>
+      <div class="limit">
+        <span class="num" aria-hidden="true">6</span>
+        <p><strong>Alle Würfel punkten:</strong> Dann darfst du wieder mit allen 6 Würfeln würfeln. Auch Straße und drei Pärchen können dann erneut fallen. Die bisherigen Punkte sind aber noch nicht gesichert. Verwürfelst du dich danach, verlierst du sie.</p>
+      </div>
+
+      <div class="section roomy">
+        <h2>Punkte</h2>
+        <div>
+          <div class="vrow dice">
+            <div class="chips"><span class="dc r" aria-hidden="true">⚀</span></div>
+            <p><strong>Eine 1 = 100 Punkte</strong></p>
+          </div>
+          <div class="vrow dice">
+            <div class="chips"><span class="dc" aria-hidden="true">⚄</span></div>
+            <p><strong>Eine 5 = 50 Punkte</strong></p>
+          </div>
+          <div class="vrow dice">
+            <div class="chips"><span class="dc" aria-hidden="true">⚄</span><span class="dc" aria-hidden="true">⚄</span><span class="arrow" aria-hidden="true">→</span><span class="dc r" aria-hidden="true">⚀</span></div>
+            <p><strong>Umdrehen:</strong> Zwei Fünfen aus demselben Wurf dürfen als eine 1 zählen, zum Beispiel, um mit zwei Einsen eine Bombe aus drei Einsen zu bilden. Beide Fünfen müssen im selben Wurf gefallen sein. Mit Sechsen geht das nicht.</p>
+          </div>
+          <div class="vrow dice">
+            <div class="chips"><span class="dc" aria-hidden="true">⚂</span><span class="dc" aria-hidden="true">⚂</span><span class="dc" aria-hidden="true">⚂</span></div>
+            <p><strong>Bombe:</strong> 3 oder mehr gleiche Würfel, die zusammen in einem Wurf gefallen sind. Die Zahl mal 100 ergibt die Punkte, bei Einsen sind es 1.000. Jeder weitere gleiche Würfel verdoppelt die Punkte.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="bomb">
+            <caption class="sr">Punkte für eine Bombe</caption>
+            <thead>
+              <tr><th scope="col">Zahl</th><th scope="col">3 gleiche</th><th scope="col">4 gleiche</th><th scope="col">5 gleiche</th><th scope="col">6 gleiche</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row"><span class="dc r" aria-label="Eins">⚀</span></th><td>1.000</td><td>2.000</td><td>4.000</td><td>8.000</td></tr>
+              <tr><th scope="row"><span class="dc" aria-label="Zwei">⚁</span></th><td>200</td><td>400</td><td>800</td><td>1.600</td></tr>
+              <tr><th scope="row"><span class="dc" aria-label="Drei">⚂</span></th><td>300</td><td>600</td><td>1.200</td><td>2.400</td></tr>
+              <tr><th scope="row"><span class="dc" aria-label="Vier">⚃</span></th><td>400</td><td>800</td><td>1.600</td><td>3.200</td></tr>
+              <tr><th scope="row"><span class="dc" aria-label="Fünf">⚄</span></th><td>500</td><td>1.000</td><td>2.000</td><td>4.000</td></tr>
+              <tr><th scope="row"><span class="dc" aria-label="Sechs">⚅</span></th><td>600</td><td>1.200</td><td>2.400</td><td>4.800</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="vrow dice">
+            <div class="chips"><span class="dc r" aria-hidden="true">⚀</span><span class="dc" aria-hidden="true">⚁</span><span class="dc" aria-hidden="true">⚂</span><span class="dc" aria-hidden="true">⚃</span><span class="dc" aria-hidden="true">⚄</span><span class="dc" aria-hidden="true">⚅</span></div>
+            <p><strong>Straße 1 bis 6 = 1.500 Punkte.</strong> Nur mit allen 6 Würfeln: im ersten Wurf oder nach einem Übertrag. Das kann in einem Zug auch mehrmals passieren.</p>
+          </div>
+          <div class="vrow dice">
+            <div class="chips"><span class="dc" aria-hidden="true">⚁</span><span class="dc" aria-hidden="true">⚁</span><span class="dc" aria-hidden="true">⚃</span><span class="dc" aria-hidden="true">⚃</span><span class="dc" aria-hidden="true">⚅</span><span class="dc" aria-hidden="true">⚅</span></div>
+            <p><strong>Drei Pärchen = 1.200 Punkte.</strong> Nur mit allen 6 Würfeln: im ersten Wurf oder nach einem Übertrag. Das kann in einem Zug auch mehrmals passieren.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Spielende</h2>
+        <p>Wer 10.000 Punkte oder mehr erreicht, beendet das Spiel nicht sofort. Alle anderen bekommen noch einen Zug und können aufholen. Gewinnt, wer danach die meisten Punkte hat. Eine Mindestpunktzahl zum Aufschreiben gibt es nicht.</p>
+      </div>
+
+      <div class="adv">
+        <div>
+          <h3>Erweiterung: Punkte übernehmen <span class="tag">Nicht Standard</span></h3>
+          <p>Hat dein Vorspieler aufgehört und noch Würfel übrig, darfst du mit genau diesen Würfeln weiterwürfeln. Punktest du einmal, werden dir seine Punkte auch angerechnet. Dein Vorspieler behält seine Punkte. Beispiel: Er hat 2.000 aufgeschrieben, du punktest mit 200 und bekommst 2.200. Verwürfelst du dich, bekommst du nichts.</p>
+        </div>
+        <button type="button" id="take-switch" class="switch" role="switch" aria-checked="false" aria-label="Erweiterung Punkte übernehmen">
+          <span class="knob" aria-hidden="true"></span><span class="lbl">Aus</span>
+        </button>
+      </div>
+      <div class="actions"><a class="btn primary" href="#wuerfeln-punkte" style="display:inline-flex;align-items:center;text-decoration:none">Zur Punktetabelle →</a></div>
+    </div>
+
+    <div id="dpanel-score" class="stack" hidden>
+      <p class="lede">Rechne die Punkte deines Zugs selbst zusammen und trage die Summe ein, zum Merken beim Weiterwürfeln oder zum Aufschreiben. Gesichert sind sie erst, wenn du sie aufschreibst. Mit den Pfeilen über den Spalten stellst du die Sitzreihenfolge ein.</p>
+      <div id="d-turn" class="turn"></div>
+      <div id="d-root" class="stack"></div>
+      <p class="note" id="dsave-note"></p>
+    </div>
+  </section>
+
+  <!-- SPIELER -->
+  <section id="view-players" class="stack" hidden>
+    <a class="back" href="#">← Alle Spiele</a>
+    <div class="section">
+      <h1>Spieler</h1>
+      <p class="lede">Lege fest, wer mitspielt. Name und Foto erscheinen in der Punktetabelle.</p>
+    </div>
+    <div id="roster-root" class="stack"></div>
+    <div class="actions"><button type="button" id="add-roster" class="btn primary">Spieler hinzufügen</button></div>
+    <p class="note" id="roster-msg" role="status"></p>
+    <p class="note" id="roster-note"></p>
+  </section>
+
+  <!-- YASSIF -->
+  <section id="view-yassif" class="stack" hidden>
+    <a class="back" href="#">← Alle Spiele</a>
+    <div class="section">
+      <h1>Yasif</h1>
+      <p class="lede">Kartenspiel mit dem normalen Pokerdeck. Wer seine Karten am schnellsten loswird, gewinnt.</p>
+      <div class="facts plain"><span>Leicht <span aria-hidden="true">●○○</span></span><span>Pokerdeck mit 52 Karten</span><span>Ab 7 Spielern 2 Decks</span></div>
+    </div>
+    <nav class="tabs" aria-label="Bereiche">
+      <a id="tab-rules" href="#yassif">Regeln</a>
+      <a id="tab-score" href="#yassif-punkte">Punkte</a>
+    </nav>
+
+    <div id="panel-rules" class="stack">
+      <div class="section">
+        <h2>Ziel</h2>
+        <p>Werde deine Handkarten so schnell wie möglich los. Du spielst mit 52 Karten, von der 2 bis zum Ass.</p>
+      </div>
+      <div class="limit">
+        <span class="num" aria-hidden="true">6</span>
+        <p><strong>6 Punkte oder weniger</strong> auf der Hand: Dann darfst du Schluss machen und die Runde beenden. Schluss machen ist dein ganzer Zug.</p>
+      </div>
+
+      <div class="section">
+        <h2>Austeilen</h2>
+        <p>Jeder bekommt <strong>6 Karten</strong>. Für ein schnelleres Spiel könnt ihr auch mit <strong>5 Karten</strong> starten. Der Geber wechselt jede Runde reihum. Es beginnt, wer links vom Geber sitzt.</p>
+      </div>
+
+      <div class="section">
+        <h2>Kartenwerte</h2>
+        <div>
+          <div class="vrow">
+            <div class="chips"><span class="pc r">A<i>♥</i></span></div>
+            <p><strong>Ass = 1 Punkt.</strong> Die beste Karte im Spiel.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">2<i>♠</i></span><span class="pc r">…</span><span class="pc">10<i>♣</i></span></div>
+            <p>2 bis 10 zählen so viel, wie auf der Karte steht.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">B<i>♠</i></span><span class="pc r">D<i>♦</i></span><span class="pc r">K<i>♥</i></span></div>
+            <p>Bube, Dame und König zählen jeweils <strong>10 Punkte</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Dein Zug</h2>
+        <p>Es geht reihum nach links. Ein Zug besteht aus zwei Schritten. Oder du machst Schluss, dann ist das dein ganzer Zug.</p>
+        <ol class="steps">
+          <li><span>Lege mindestens eine Karte ab (siehe unten).</span></li>
+          <li><span>Nimm eine Karte: vom verdeckten Nachziehstapel oder eine der Karten, die dein Vorspieler zuletzt abgelegt hat.<span data-adv="on" hidden> Hast du eine Straße mit gemischten Farben gelegt, ziehst du stattdessen 2 Karten.</span></span></li>
+        </ol>
+      </div>
+
+      <div class="section roomy">
+        <h2>Das darfst du ablegen</h2>
+        <div>
+          <div class="move">
+            <div><h3>Einzelne Karte</h3><p>Eine beliebige Karte aus deiner Hand.</p></div>
+            <div class="hand"><span class="pc">K<i>♠</i></span></div>
+          </div>
+          <div class="move">
+            <div><h3>Paar, Drilling, Vierling</h3><p>Zwei, drei oder vier Karten mit dem gleichen Wert.</p></div>
+            <div class="hand"><span class="pc">7<i>♠</i></span><span class="pc r">7<i>♥</i></span><span class="pc r">7<i>♦</i></span></div>
+          </div>
+          <div class="move">
+            <div><h3>Straße</h3><p>Mindestens drei Karten in Folge, alle in der gleichen Farbe.</p></div>
+            <div class="hand"><span class="pc">5<i>♠</i></span><span class="pc">6<i>♠</i></span><span class="pc">7<i>♠</i></span></div>
+          </div>
+          <div class="move" data-adv="on" hidden>
+            <div><h3>Straße mit gemischten Farben <span class="tag">Fortgeschritten</span></h3><p>Mindestens drei Karten in Folge, die Farben sind egal. Danach ziehst du 2 Karten statt 1. Bei drei Karten legst du 3 ab und ziehst 2, du wirst also trotzdem eine Karte mehr los, als du bekommst.</p></div>
+            <div class="hand"><span class="pc r">5<i>♦</i></span><span class="pc">6<i>♣</i></span><span class="pc">7<i>♠</i></span></div>
+          </div>
+          <div class="move">
+            <div><h3>Nachziehtrick</h3><p>Du legst Karten ab und ziehst vom verdeckten Stapel. Passt die gezogene Karte dazu, wirfst du sie direkt noch hinterher. Bei einer einzelnen Karte heißt das: gleicher Wert. Bei einer Straße muss sie die Straße verlängern. Hast du 3-4-5 in Pik gelegt, passt also die 2 oder die 6 in Pik.</p></div>
+            <div class="examples">
+              <div class="hand"><span class="pc">9<i>♣</i></span><span class="arrow" aria-hidden="true">+</span><span class="pc r">9<i>♦</i></span></div>
+              <div class="hand"><span class="pc">3<i>♠</i></span><span class="pc">4<i>♠</i></span><span class="pc">5<i>♠</i></span><span class="arrow" aria-hidden="true">+</span><span class="pc">6<i>♠</i></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="adv">
+          <div>
+            <h3>Fortgeschrittene Regel</h3>
+            <p>Straßen dürfen aus gemischten Farben bestehen. Dafür ziehst du danach 2 Karten statt 1.</p>
+          </div>
+          <button type="button" id="adv-switch" class="switch" role="switch" aria-checked="false" aria-label="Fortgeschrittene Regel">
+            <span class="knob" aria-hidden="true"></span><span class="lbl">Aus</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="section roomy">
+        <h2>Wer gewinnt?</h2>
+        <p>Wer am Ende die wenigsten Punkte auf der Hand hat, gewinnt die Runde. Bei Gleichstand gewinnt, wer Schluss gemacht hat.</p>
+        <div class="limit">
+          <span class="num wide" aria-hidden="true">+15</span>
+          <p><strong>15 Strafpunkte:</strong> Hast du Schluss gemacht, aber jemand hat weniger Punkte als du, bekommst du 15 Punkte zusätzlich zu den Punkten deiner Handkarten.</p>
+        </div>
+      </div>
+
+      <div class="section roomy">
+        <h2>Punkte und Spielende</h2>
+        <p>Ihr spielt mehrere Runden. Wer die Runde gewinnt, bekommt 0 Punkte. Alle anderen bekommen die Punkte ihrer Handkarten. Wer als Erstes <strong>über 100 Punkte</strong> kommt, verliert das Spiel.</p>
+        <div class="limit">
+          <span class="num wide" aria-hidden="true">50 → 0</span>
+          <p><strong>Genau 50 Punkte:</strong> Du fällst zurück auf 0.</p>
+        </div>
+        <div class="limit">
+          <span class="num wide" aria-hidden="true">100 → 50</span>
+          <p><strong>Genau 100 Punkte:</strong> Du fällst zurück auf 50.</p>
+        </div>
+      </div>
+
+      <div class="section roomy faq">
+        <h2>Häufige Fragen</h2>
+        <div>
+          <details>
+            <summary>Wann darf ich Schluss machen?</summary>
+            <div class="ans">
+              <p>Zu Beginn deines Zuges, wenn du 6 Punkte oder weniger auf der Hand hast. Ein Zug ist entweder spielen oder Schluss machen, beides zusammen geht nicht.</p>
+              <p>Kommst du erst durch Ablegen und Nehmen auf 6 oder weniger, darfst du erst in deinem nächsten Zug Schluss machen.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Darf ich einen Zug auslassen?</summary>
+            <div class="ans">
+              <p>Nein. Du musst immer mindestens eine Karte ablegen und eine Karte nehmen. Schieben gibt es nicht.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Welche Karte darf ich von meinem Vorspieler nehmen?</summary>
+            <div class="ans">
+              <p>Das hängt davon ab, was dein Vorspieler abgelegt hat. Du legst zuerst selbst ab und entscheidest dann, ob du vom verdeckten Stapel oder von seinen Karten nimmst. Die markierten Karten darfst du nehmen:</p>
+              <div>
+                <div class="take">
+                  <div class="hand"><span class="pc ok">8<i>♥</i></span></div>
+                  <p><strong>Einzelne Karte:</strong> Du nimmst genau diese Karte.</p>
+                </div>
+                <div class="take">
+                  <div class="hand"><span class="pc ok">7<i>♠</i></span><span class="pc r ok">7<i>♥</i></span><span class="pc r ok">7<i>♦</i></span></div>
+                  <p><strong>Paar, Drilling oder Vierling:</strong> Du darfst dir jede Karte davon aussuchen, in jeder Farbe.</p>
+                </div>
+                <div class="take">
+                  <div class="hand"><span class="pc ok">3<i>♠</i></span><span class="pc no">4<i>♠</i></span><span class="pc ok">5<i>♠</i></span></div>
+                  <p><strong>Straße:</strong> Du darfst nur eine der beiden äußeren Karten nehmen. Bei 3-4-5 in Pik also die 3 oder die 5.</p>
+                </div>
+              </div>
+            </div>
+          </details>
+          <details>
+            <summary>Wie funktioniert das Ass in einer Straße?</summary>
+            <div class="ans">
+              <p>Das Ass zählt immer nur 1. Es gehört deshalb an den Anfang einer Straße. Zusammen mit dem König geht es nicht.</p>
+              <div>
+                <div class="take">
+                  <div class="hand"><span class="pc ok">A<i>♠</i></span><span class="pc ok">2<i>♠</i></span><span class="pc ok">3<i>♠</i></span></div>
+                  <p><strong>Erlaubt:</strong> Ass, 2, 3.</p>
+                </div>
+                <div class="take">
+                  <div class="hand"><span class="pc no">D<i>♠</i></span><span class="pc no">K<i>♠</i></span><span class="pc no">A<i>♠</i></span></div>
+                  <p><strong>Nicht erlaubt:</strong> Dame, König, Ass. Auch König, Ass, 2 ist keine Straße.</p>
+                </div>
+              </div>
+            </div>
+          </details>
+          <details>
+            <summary>Was passiert, wenn der Nachziehstapel leer ist?</summary>
+            <div class="ans">
+              <p>Dann wird der Ablagestapel neu gemischt und ist der neue verdeckte Nachziehstapel.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Wie viele Spieler können mitspielen?</summary>
+            <div class="ans">
+              <p>Mit einem Kartendeck passen 2 bis etwa 6 Spieler. Seid ihr mehr, nehmt ihr einfach 2 Decks. Das funktioniert gut.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Kann ich mit Jokern spielen?</summary>
+            <div class="ans">
+              <p>Ja, wenn dein Deck Joker hat, wird das Spiel etwas spannender. Ein Joker ersetzt jede beliebige Karte, zum Beispiel in einer Straße oder in einem Paar.</p>
+              <p>Ein Joker, der am Ende noch auf deiner Hand liegt, kostet Strafpunkte. Unser Vorschlag sind 10 Punkte. So lohnt es sich nicht, ihn zu lange zu behalten.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div class="actions"><a class="btn primary" href="#yassif-punkte" style="display:inline-flex;align-items:center;text-decoration:none">Zur Punktetabelle →</a></div>
+    </div>
+
+    <div id="panel-score" class="stack" hidden>
+      <p class="lede">Trage nach jeder Runde die Punkte der Handkarten ein und markiere mit „Schluss“, wer die Runde beendet hat. Rundensieger bekommen 0 Punkte dazu. Wer Schluss macht, aber nicht gewinnt, bekommt 15 Strafpunkte extra. Bei genau 50 geht es zurück auf 0, bei genau 100 auf 50. Mit den Pfeilen über den Spalten stellst du die Sitzreihenfolge ein.</p>
+      <div id="score-root" class="stack"></div>
+      <p class="note" id="save-note"></p>
+    </div>
+  </section>
+
+  <!-- SCHWIMMEN -->
+  <section id="view-swim" class="stack" hidden>
+    <a class="back" href="#">← Alle Spiele</a>
+    <div class="section">
+      <h1>Schwimmen</h1>
+      <p class="lede">Kartenspiel mit 32 Karten, auch „31“ genannt. Wer am Ende der Runde die schlechteste Hand hat, verliert ein Leben.</p>
+      <div class="facts plain"><span>Leicht <span aria-hidden="true">●○○</span></span><span>32 Karten, von der 7 bis zum Ass</span><span>2 bis 8 Spieler</span></div>
+    </div>
+    <nav class="tabs" aria-label="Bereiche">
+      <a id="stab-rules" href="#schwimmen">Regeln</a>
+      <a id="stab-score" href="#schwimmen-punkte">Leben</a>
+    </nav>
+
+    <div id="spanel-rules" class="stack">
+      <div class="section">
+        <h2>Ziel</h2>
+        <p>Sammle drei Karten, die zusammen möglichst nah an <strong>31 Punkte</strong> kommen. Du spielst mit 32 Karten, von der 7 bis zum Ass.</p>
+      </div>
+      <div class="limit">
+        <span class="num" aria-hidden="true">3</span>
+        <p><strong>3 Leben</strong> hat jeder zu Beginn. Wer am Rundenende die schlechteste Hand hat, verliert ein Leben. Wer als Letzter noch dabei ist, gewinnt.</p>
+      </div>
+
+      <div class="section">
+        <h2>Austeilen</h2>
+        <p>Jeder bekommt <strong>3 verdeckte Karten</strong> als Hand. Dazu kommen <strong>3 weitere verdeckte Karten</strong> als Zusatzhand auf den Tisch. Der Rest bleibt verdeckt als Stapel neben dem Tisch. Der Geber wechselt jede Runde reihum. Es beginnt, wer links vom Geber sitzt.</p>
+      </div>
+
+      <div class="section">
+        <h2>Die Zusatzhand</h2>
+        <p>Wer links vom Geber sitzt, hat <strong>zwei Hände</strong> zur Auswahl: seine eigene und die Zusatzhand. Er sieht sich zuerst seine eigene Hand an und entscheidet dann: behalten oder gegen die Zusatzhand tauschen, die er vorher nicht ansehen darf. Die Hand, die er nicht nimmt, wird <strong>offen in die Mitte</strong> gelegt. Die drei offenen Karten in der Mitte sind also die nicht gewählte Hand.</p>
+      </div>
+
+      <div class="section">
+        <h2>Kartenwerte</h2>
+        <div>
+          <div class="vrow">
+            <div class="chips"><span class="pc r">A<i>♥</i></span></div>
+            <p><strong>Ass = 11 Punkte.</strong> Das Ass zählt immer 11.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">10<i>♠</i></span><span class="pc">B<i>♣</i></span><span class="pc r">D<i>♦</i></span><span class="pc r">K<i>♥</i></span></div>
+            <p>Zehn, Bube, Dame und König zählen jeweils <strong>10 Punkte</strong>.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">9<i>♠</i></span><span class="pc r">8<i>♥</i></span><span class="pc">7<i>♣</i></span></div>
+            <p>Neun, Acht und Sieben zählen so viel, wie auf der Karte steht.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section roomy">
+        <h2>So wird gezählt</h2>
+        <p>Es zählen nur Karten <strong>derselben Farbe</strong> zusammen. Gewertet wird deine beste Farbe. Hast du drei verschiedene Farben, zählt die höchste einzelne Karte.</p>
+        <div>
+          <div class="vrow">
+            <div class="chips"><span class="pc r">A<i>♥</i></span><span class="pc r">K<i>♥</i></span><span class="pc r">D<i>♥</i></span></div>
+            <p><strong>31 Punkte.</strong> Das ist das Maximum: Ass und zwei Zehnerkarten in einer Farbe.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">10<i>♠</i></span><span class="pc">9<i>♠</i></span><span class="pc r">K<i>♦</i></span></div>
+            <p><strong>19 Punkte.</strong> Pik zählt 10 und 9. Der Karo-König steht allein und zählt weniger.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">A<i>♠</i></span><span class="pc r">K<i>♦</i></span><span class="pc">7<i>♣</i></span></div>
+            <p><strong>11 Punkte.</strong> Drei Farben: Es zählt nur die höchste Karte, hier das Ass.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">7<i>♠</i></span><span class="pc r">7<i>♥</i></span><span class="pc r">7<i>♦</i></span></div>
+            <p><strong>30,5 Punkte.</strong> Drei gleiche Werte in verschiedenen Farben.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">A<i>♠</i></span><span class="pc r">A<i>♥</i></span><span class="pc r">A<i>♦</i></span></div>
+            <p><strong>Feuer (drei Asse) = 33 Punkte.</strong> Die beste Hand im Spiel, siehe unten.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section roomy">
+        <h2>Dein Zug</h2>
+        <p>Es geht reihum nach links. Du hast vier Möglichkeiten:</p>
+        <div>
+          <div class="move">
+            <div><h3>Eine Karte tauschen</h3><p>Tausche eine deiner Handkarten gegen eine der drei offenen Karten in der Mitte.</p></div>
+            <div class="hand"><span class="pc">7<i>♣</i></span><span class="arrow" aria-hidden="true">→</span><span class="pc r">K<i>♥</i></span></div>
+          </div>
+          <div class="move">
+            <div><h3>Alle drei tauschen</h3><p>Nimm die drei Karten aus der Mitte und lege deine drei Handkarten offen dafür hin.</p></div>
+            <div class="hand"><span class="pc">×3</span></div>
+          </div>
+          <div class="move">
+            <div><h3>Schieben</h3><p>Du tauschst nichts. Der Nächste ist dran.</p></div>
+            <div class="hand"><span class="pc">→</span></div>
+          </div>
+          <div class="move">
+            <div><h3>Klopfen</h3><p>Du klopfst auf den Tisch. Alle anderen haben noch genau einen Zug, dann werden alle Karten aufgedeckt. Klopfen ist dein ganzer Zug.</p></div>
+            <div class="hand"><span class="pc">✊</span></div>
+          </div>
+        </div>
+        <p class="note">Zwei Karten tauschen und eine behalten gibt es nicht.</p>
+      </div>
+
+      <div class="section roomy">
+        <h2>Ende der Runde</h2>
+        <ol class="steps">
+          <li><span><strong>Klopfen:</strong> Alle anderen bekommen noch einen Zug, dann wird aufgedeckt.</span></li>
+          <li><span><strong>31 Punkte:</strong> Wer 31 hat, deckt sofort auf, auch gleich beim Austeilen. Die Runde ist damit zu Ende.</span></li>
+          <li><span><strong>Alle schieben:</strong> Haben alle nacheinander geschoben, kommen die drei Karten in der Mitte weg und es werden drei neue vom Stapel aufgedeckt.</span></li>
+        </ol>
+      </div>
+
+      <div class="section roomy">
+        <h2>Leben verlieren</h2>
+        <div class="limit">
+          <span class="num wide" aria-hidden="true">−1 ♥</span>
+          <p>Beim Aufdecken verliert die Person mit der <strong>niedrigsten Punktzahl</strong> ein Leben. Haben mehrere gleich wenig, verlieren alle von ihnen ein Leben.</p>
+        </div>
+        <div class="limit">
+          <span class="num wide" aria-hidden="true">Feuer</span>
+          <p><strong>Feuer</strong> (drei Asse) zählt 33 Punkte. Alle anderen verlieren sofort ein Leben, du selbst nicht.</p>
+        </div>
+        <div class="limit">
+          <span class="num wide" aria-hidden="true">0 ♥</span>
+          <p><strong>Schwimmen:</strong> Wer sein letztes Leben verliert, „schwimmt“. Du spielst weiter. Verlierst du noch einmal, bist du raus. Das Spiel endet, wenn nur noch einer übrig ist.</p>
+        </div>
+      </div>
+
+      <div class="section roomy">
+        <h2>Häufige Fragen</h2>
+        <div class="faq">
+          <details>
+            <summary>Muss ich in jedem Zug tauschen?</summary>
+            <div class="ans"><p>Nein. Wenn du mit deiner Hand zufrieden bist, schiebst du einfach.</p></div>
+          </details>
+          <details>
+            <summary>Was passiert, wenn mehrere gleich wenig Punkte haben?</summary>
+            <div class="ans">
+              <p>Dann verlieren alle, die gleich wenig Punkte haben, ein Leben. Haben also zwei Spieler die niedrigste Hand, verlieren beide.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Darf ich nach dem Klopfen noch tauschen?</summary>
+            <div class="ans"><p>Nein. Wer geklopft hat, wartet ab. Alle anderen haben noch genau einen Zug, dann wird aufgedeckt.</p></div>
+          </details>
+          <details>
+            <summary>Wie viele Spieler können mitspielen?</summary>
+            <div class="ans"><p>Mit einem Blatt aus 32 Karten gehen 2 bis 8 Spieler. Die Tabelle in dieser App unterstützt bis zu 8.</p></div>
+          </details>
+          <details>
+            <summary>Wie viele Leben sind Pflicht?</summary>
+            <div class="ans"><p>Meistens 3. Für ein kürzeres oder längeres Spiel stellst du die Zahl in der Lebenstabelle um.</p></div>
+          </details>
+        </div>
+      </div>
+      <div class="actions"><a class="btn primary" href="#schwimmen-punkte" style="display:inline-flex;align-items:center;text-decoration:none">Zur Lebenstabelle →</a></div>
+    </div>
+
+    <div id="spanel-score" class="stack" hidden>
+      <p class="lede">Tippe nach jeder Runde bei den Spielern auf „Verliert“, die ein Leben abgeben. Hat jemand Feuer, tippe bei ihm auf „Feuer“: Alle anderen verlieren dann automatisch eines. Mit den Pfeilen über den Spalten stellst du die Sitzreihenfolge ein.</p>
+      <div id="s-root" class="stack"></div>
+      <p class="note" id="ssave-note"></p>
+    </div>
+  </section>
+
+  <!-- STATISTIK -->
+  <section id="view-stats" class="stack" hidden>
+    <a class="back" href="#">← Alle Spiele</a>
+    <div class="section">
+      <h1>Statistik</h1>
+      <p class="lede">Entschiedene Spiele werden automatisch auf diesem Gerät gesammelt. Hier siehst du, wer wie oft gewonnen hat, und den Verlauf.</p>
+    </div>
+    <div id="stats-root" class="stack"></div>
+    <p class="note" id="stats-note"></p>
+  </section>
+
+  <!-- HILFE -->
+  <section id="view-help" class="stack" hidden>
+    <a class="back" href="#">← Alle Spiele</a>
+    <div class="section">
+      <h1>Hilfe</h1>
+      <p class="lede">Hier stehen Antworten auf häufige Fragen. Fehlt etwas oder klappt etwas nicht, schreib uns einfach persönlich.</p>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Meine Spielstände sind weg. Was ist passiert?</summary>
+        <div class="ans"><p>Spielstände und Spieler werden nur auf dem Gerät gespeichert, auf dem ihr spielt, und zwar im Browser. Auf einem anderen Gerät oder in einem anderen Browser seht ihr sie nicht. Auch beim Löschen der Browserdaten oder im privaten Modus gehen sie verloren.</p></div>
+      </details>
+      <details>
+        <summary>Wie lege ich die Spielebox auf den Startbildschirm?</summary>
+        <div class="ans"><p>Öffne das Menü deines Browsers und wähle „Zum Startbildschirm hinzufügen“. Dann öffnet sie sich wie eine App.</p></div>
+      </details>
+      <details>
+        <summary>Wie lege ich Namen und Fotos fest?</summary>
+        <div class="ans"><p>Tippe oben rechts auf das Personen-Symbol. Dort stellst du ein, wer mitspielt, und wählst Fotos. Die Spieler gelten dann für alle Spiele.</p></div>
+      </details>
+      <details>
+        <summary>Wo sehe ich, wer wie oft gewonnen hat?</summary>
+        <div class="ans"><p>Tippe oben auf das Diagramm-Symbol. Dort stehen die Siege pro Spieler und der Verlauf aller entschiedenen Spiele. Das wird automatisch mitgeschrieben und, wie die Spielstände, nur auf diesem Gerät gespeichert.</p></div>
+      </details>
+      <details>
+        <summary>Wie ändere ich die Sitzreihenfolge?</summary>
+        <div class="ans"><p>In jeder Punktetabelle gibt es über den Spalten kleine Pfeile. Damit schiebst du einen Spieler nach links oder rechts. Die Reihenfolge der Spalten ist die Reihenfolge am Tisch.</p></div>
+      </details>
+      <details>
+        <summary>Etwas sieht komisch aus. Was kann ich tun?</summary>
+        <div class="ans"><p>Lade die Seite einmal neu. Hilft das nicht, schreib uns persönlich, was passiert ist.</p></div>
+      </details>
+    </div>
+  </section>
+  <!-- SHITHEAD -->
+  <section id="view-shit" class="stack" hidden>
+    <a class="back" href="#">← Alle Spiele</a>
+    <div class="section">
+      <h1>Shithead</h1>
+      <p class="lede">Kartenspiel, bei dem man alle Karten loswerden muss. Wer am Ende als Letzter noch Karten hat, ist der Shithead.</p>
+      <div class="facts plain"><span>Mittel <span aria-hidden="true">●●○</span></span><span>Ein Pokerdeck mit 52 Karten</span><span>2 bis 5 Spieler</span></div>
+    </div>
+    <nav class="tabs" aria-label="Bereiche">
+      <a id="shtab-rules" href="#shithead">Regeln</a>
+      <a id="shtab-score" href="#shithead-wertung">Wertung</a>
+    </nav>
+
+    <div id="shpanel-rules" class="stack">
+      <div class="section">
+        <h2>Ziel</h2>
+        <p>Werde alle deine Karten los: erst die Handkarten, dann die offenen, dann die verdeckten. Wer am Ende als Letzter noch Karten hat, hat verloren und ist der <strong>Shithead</strong>. Er gibt die nächste Runde.</p>
+      </div>
+
+      <div class="section roomy">
+        <h2>Austeilen</h2>
+        <p>Jeder bekommt nacheinander:</p>
+        <ol class="steps">
+          <li><span><strong>3 verdeckte Karten</strong> in einer Reihe vor sich. Sie bleiben liegen und dürfen nicht angesehen werden.</span></li>
+          <li><span><strong>3 offene Karten</strong>, je eine offen auf jede verdeckte Karte.</span></li>
+          <li><span><strong>3 Handkarten</strong>, die nur du ansiehst.</span></li>
+        </ol>
+        <p>Der Rest bleibt als verdeckter Nachziehstapel in der Mitte. In der ersten Runde wird der Geber ausgelost. Danach gibt immer der Shithead der letzten Runde.</p>
+      </div>
+
+      <div class="section">
+        <h2>Vor dem Start: tauschen</h2>
+        <p>Bevor es losgeht, darfst du beliebig viele Handkarten gegen deine offenen Karten tauschen. Meist lohnt es sich, niedrige Karten in die Hand zu nehmen und hohe Karten, 2er und 10er offen liegen zu lassen. Die verdeckten Karten bleiben tabu.</p>
+      </div>
+
+      <div class="section">
+        <h2>Wer fängt an?</h2>
+        <p>Es beginnt, wer eine <strong>3</strong> hat, offen oder in der Hand. Hat niemand eine 3, kommt die 4 an die Reihe, dann die 5 und so weiter. Der Spieler legt die Karte offen in die Mitte. Das ist der Ablagestapel.</p>
+      </div>
+
+      <div class="section roomy">
+        <h2>Dein Zug</h2>
+        <p>Es geht reihum nach links. Die Karten sind von niedrig nach hoch geordnet:</p>
+        <div class="hand">
+          <span class="pc">3<i>♠</i></span><span class="pc r">4<i>♥</i></span><span class="pc">…</span><span class="pc">10<i>♣</i></span><span class="pc r">B<i>♦</i></span><span class="pc">D<i>♠</i></span><span class="pc r">K<i>♥</i></span><span class="pc r">A<i>♦</i></span>
+        </div>
+        <ol class="steps">
+          <li><span><strong>Legen:</strong> Lege eine Karte oder mehrere Karten mit gleicher Zahl auf den Ablagestapel. Sie müssen <strong>gleich hoch oder höher</strong> sein als die oberste Karte. Nur wenn eine 7 die Richtung gewechselt hat, müssen sie gleich hoch oder niedriger sein.</span></li>
+          <li><span><strong>Nachziehen:</strong> Ziehe vom Nachziehstapel nach, bis du wieder 3 Handkarten hast. Ist der Stapel leer, entfällt das.</span></li>
+          <li><span><strong>Aufnehmen:</strong> Kannst oder willst du nicht legen, nimmst du den ganzen Ablagestapel auf die Hand. Dann ist der Nächste dran und darf eine beliebige Karte auf den leeren Platz legen.</span></li>
+        </ol>
+        <p class="note">Solange du Handkarten hast, spielst du nur von der Hand und nicht von den offenen Karten.</p>
+      </div>
+
+      <div class="section roomy">
+        <h2>Sonderkarten</h2>
+        <div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">2<i>♠</i></span></div>
+            <p><strong>Die 2</strong> darf auf jede Karte gelegt werden. Danach darf wieder jede Karte darauf gelegt werden. Sie setzt den Stapel quasi zurück.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">9<i>♠</i></span><span class="pc r">9<i>♥</i></span><span class="pc r">9<i>♦</i></span><span class="pc">3<i>♣</i></span></div>
+            <p><strong>Die 3 ist der magische Spiegel.</strong> Sie kopiert die oberste Karte auf dem Stapel, auch mit deren Wirkung. Du kannst sie deshalb immer legen. Mit ihr füllst du zum Beispiel vier gleiche Karten voll (drei Neunen plus 3 = vier Neunen, der Stapel wird verbrannt). Oder du kopierst eine Sonderkarte: Auf einer 7 wirkt sie wie eine 7, auf einer 8 wie eine 8. Liegt noch nichts auf dem Stapel, zählt sie als ganz normale 3.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">7<i>♠</i></span><span class="arrow" aria-hidden="true">↓</span></div>
+            <p><strong>Die 7 wechselt die Richtung.</strong> Nach einer 7 muss die nächste Karte <strong>gleich hoch oder niedriger</strong> sein statt höher. Die Richtung bleibt so, bis wieder eine 7 gelegt wird oder der Stapel verbrannt wird. Jede 7 wechselt einmal: Bei einer ungeraden Zahl Siebenen geht es runter, bei einer geraden wieder hoch. Legst du zwei Siebenen auf einmal, geht es also runter und gleich wieder hoch. Die nächste Karte muss dann wieder höher sein.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">8<i>♠</i></span><span class="pc r">8<i>♥</i></span></div>
+            <p><strong>Die 8 lässt aussetzen.</strong> Der Nächste muss aussetzen. Bei zwei Achten setzen zwei Spieler aus, bei drei Achten drei Spieler und so weiter. Sind alle anderen ausgesetzt, bist du noch einmal dran.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">10<i>♣</i></span></div>
+            <p><strong>Die 10</strong> darf immer gelegt werden. Der ganze Ablagestapel wird aus dem Spiel genommen („verbrannt“). Du bist noch einmal dran und legst eine beliebige Karte.</p>
+          </div>
+          <div class="vrow">
+            <div class="chips"><span class="pc">6<i>♠</i></span><span class="pc r">6<i>♥</i></span><span class="pc r">6<i>♦</i></span><span class="pc">6<i>♣</i></span></div>
+            <p><strong>Vier gleiche Karten</strong> obenauf verbrennen den Stapel. Egal, ob sie auf einmal gelegt oder nacheinander daraufgelegt wurden. Du bist noch einmal dran.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section roomy">
+        <h2>Die Endphase</h2>
+        <ol class="steps">
+          <li><span><strong>Offene Karten:</strong> Hast du keine Handkarten mehr und der Nachziehstapel ist leer, spielst du deine offenen Karten. Kannst du keine passende legen, nimmst du den Ablagestapel auf die Hand.</span></li>
+          <li><span><strong>Verdeckte Karten:</strong> Sind Hand und offene Karten weg, deckst du eine verdeckte Karte blind auf und legst sie. Passt sie, bleibt sie liegen. Passt sie nicht, nimmst du den Stapel samt dieser Karte auf.</span></li>
+          <li><span><strong>Ende:</strong> Wer alle Karten los ist, ist raus und in Sicherheit. Der Letzte mit Karten ist der Shithead.</span></li>
+        </ol>
+      </div>
+
+      <div class="section roomy">
+        <h2>Häufige Fragen</h2>
+        <div class="faq">
+          <details>
+            <summary>Darf ich mehrere Karten auf einmal legen?</summary>
+            <div class="ans"><p>Ja, aber nur Karten mit der gleichen Zahl, zum Beispiel zwei Neunen. Sie müssen zusammen gleich hoch oder höher sein als die oberste Karte.</p></div>
+          </details>
+          <details>
+            <summary>Was kann der magische Spiegel (die 3) alles?</summary>
+            <div class="ans">
+              <p>Die 3 kopiert immer die oberste Karte. Sie zählt dann wie diese Karte, auch mit ihrer Wirkung.</p>
+              <p><strong>Vier voll machen:</strong> Liegen drei Neunen obenauf, macht eine 3 daraus vier Neunen. Der Stapel wird verbrannt.</p>
+              <p><strong>Sonderkarten kopieren:</strong> Auf einer 7 wechselt sie die Richtung noch einmal, auf einer 8 lässt sie einen weiteren Spieler aussetzen, auf einer 2 setzt sie ebenfalls zurück.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Wie funktionieren mehrere Siebenen?</summary>
+            <div class="ans">
+              <p>Jede 7 wechselt die Richtung einmal. Eine 7: runter. Zwei 7: runter und wieder hoch, also normal höher. Drei 7: runter. Auch eine 3, die eine 7 kopiert, wechselt die Richtung.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Wie viele Spieler können mitspielen?</summary>
+            <div class="ans"><p>Mit einem Deck gehen 2 bis 5 Spieler, am schönsten mit 3 oder 4. Seid ihr mehr, nehmt ihr zwei Decks.</p></div>
+          </details>
+          <details>
+            <summary>Was gewinnt man?</summary>
+            <div class="ans"><p>Es gibt keine Punkte. Wichtig ist nur, wer am Ende der Shithead ist. In der Wertung zählt die App mit, wie oft jeder Shithead war.</p></div>
+          </details>
+        </div>
+      </div>
+      <div class="actions"><a class="btn primary" href="#shithead-wertung" style="display:inline-flex;align-items:center;text-decoration:none">Zur Wertung →</a></div>
+    </div>
+
+    <div id="shpanel-score" class="stack" hidden>
+      <p class="lede">Tippe nach jeder Runde bei der Person auf „Shithead“, die am Ende noch Karten hatte. Unten siehst du, wie oft jeder schon Shithead war. Mit den Pfeilen über den Spalten stellst du die Sitzreihenfolge ein.</p>
+      <div id="sh-root" class="stack"></div>
+      <p class="note" id="shsave-note"></p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var K_ROSTER = 'spielebox.players.v1';
+  var K_GAME = 'spielebox.yassif.v2';
+  var K_OLD = 'spielebox.yassif.v1';
+  var K_SET = 'spielebox.settings.v1';
+  var MAXG = 8;   /* Spieler pro Spiel (ab 7 mit zwei Decks) */
+  var MAXR = 8;   /* Spieler in der Liste */
+  var storageOk = true;
+
+  function read(key) {
+    try { var s = localStorage.getItem(key); return s ? JSON.parse(s) : null; }
+    catch (e) { storageOk = false; return null; }
+  }
+  function write(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); }
+    catch (e) { storageOk = false; updateNotes(); }
+  }
+
+  function h(tag, props, kids) {
+    var e = document.createElement(tag);
+    if (props) {
+      Object.keys(props).forEach(function (k) {
+        var v = props[k];
+        if (v === false || v === null || v === undefined) return;
+        if (k === 'class') e.className = v;
+        else if (k === 'text') e.textContent = v;
+        else e.setAttribute(k, v === true ? '' : v);
+      });
+    }
+    (kids || []).forEach(function (c) {
+      if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return e;
+  }
+
+  function twoStep(btn, label, armedLabel, action) {
+    var t = null;
+    btn.textContent = label;
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-armed') === '1') {
+        clearTimeout(t);
+        btn.removeAttribute('data-armed');
+        btn.textContent = label;
+        action();
+      } else {
+        btn.setAttribute('data-armed', '1');
+        btn.textContent = armedLabel;
+        t = setTimeout(function () {
+          btn.removeAttribute('data-armed');
+          btn.textContent = label;
+        }, 3500);
+      }
+    });
+  }
+
+  function newRound(n) {
+    var pts = [];
+    for (var i = 0; i < n; i++) pts.push('');
+    return { pts: pts, caller: null };
+  }
+
+  /* ---------- Spielerliste (gilt fuer alle Spiele) ---------- */
+  var old = read(K_OLD);
+  var roster = read(K_ROSTER);
+  var migrated = false;
+  if (!roster || !Array.isArray(roster.list) || roster.list.length < 2) {
+    var names = (old && Array.isArray(old.players) && old.players.length >= 2) ? old.players : ['Spieler 1', 'Spieler 2'];
+    roster = {
+      list: names.map(function (nm, i) { return { id: 'p' + (i + 1), name: String(nm), photo: null }; }),
+      next: names.length + 1
+    };
+    migrated = !!(old && Array.isArray(old.players) && old.players.length >= 2);
+    write(K_ROSTER, roster);
+  }
+  function saveRoster() { write(K_ROSTER, roster); }
+  function player(id) {
+    for (var i = 0; i < roster.list.length; i++) if (roster.list[i].id === id) return roster.list[i];
+    return null;
+  }
+  function pname(id) {
+    var pl = player(id);
+    var s = pl ? (pl.name || '').trim() : '';
+    return s || 'Spieler';
+  }
+  function initial(n) {
+    var s = (n || '').trim();
+    return s ? s.charAt(0).toUpperCase() : '?';
+  }
+  function avatarEl(pl, size) {
+    var a = h('span', { class: 'av' + (size ? ' ' + size : ''), 'aria-hidden': 'true' });
+    if (pl && pl.photo) a.appendChild(h('img', { alt: '', src: pl.photo }));
+    else a.textContent = initial(pl ? pl.name : '');
+    return a;
+  }
+
+  /* ---------- Spielstand Yassif ---------- */
+  var game = read(K_GAME);
+  if (!game || !Array.isArray(game.ids) || !Array.isArray(game.rounds) || game.rounds.length < 1) {
+    if (migrated && old && Array.isArray(old.rounds) && old.rounds.length >= 1) {
+      game = { ids: roster.list.slice(0, old.players.length).map(function (p) { return p.id; }), rounds: old.rounds };
+    } else {
+      game = { ids: [roster.list[0].id, roster.list[1].id], rounds: [newRound(2)] };
+    }
+  }
+  function saveGame() { write(K_GAME, game); }
+
+  function removeColumn(p) {
+    game.ids.splice(p, 1);
+    game.rounds.forEach(function (r) {
+      if (Array.isArray(r.pts)) r.pts.splice(p, 1);
+      if (r.caller === p) r.caller = null;
+      else if (typeof r.caller === 'number' && r.caller > p) r.caller--;
+    });
+  }
+  function addColumn(id) {
+    game.ids.push(id);
+    game.rounds.forEach(function (r) { r.pts.push(''); });
+  }
+  function fixGame() {
+    for (var i = game.ids.length - 1; i >= 0; i--) {
+      if (!player(game.ids[i]) || game.ids.indexOf(game.ids[i]) !== i) removeColumn(i);
+    }
+    game.rounds.forEach(function (r) {
+      if (!Array.isArray(r.pts)) r.pts = [];
+      while (r.pts.length < game.ids.length) r.pts.push('');
+      r.pts.length = game.ids.length;
+      if (typeof r.caller !== 'number' || r.caller >= game.ids.length || r.caller < 0) r.caller = null;
+    });
+    for (var j = 0; j < roster.list.length && game.ids.length < 2; j++) {
+      if (game.ids.indexOf(roster.list[j].id) === -1) addColumn(roster.list[j].id);
+    }
+  }
+  fixGame();
+  if (!game.gid) game.gid = gidNew();
+  saveGame();
+
+  var settings = read(K_SET) || { advanced: false };
+
+  function updateNotes() {
+    var c = document.getElementById('dsave-note');
+    if (c) {
+      c.textContent = storageOk
+        ? 'Die Spielstände werden auf diesem Gerät gespeichert.'
+        : 'Speichern ist hier gerade nicht möglich. Die Punkte bleiben nur erhalten, solange diese Seite geöffnet ist.';
+    }
+    var hn = document.getElementById('shsave-note');
+    if (hn) {
+      hn.textContent = storageOk
+        ? 'Die Wertung wird auf diesem Gerät gespeichert.'
+        : 'Speichern ist hier gerade nicht möglich. Die Wertung bleibt nur erhalten, solange diese Seite geöffnet ist.';
+    }
+    var sn = document.getElementById('ssave-note');
+    if (sn) {
+      sn.textContent = storageOk
+        ? 'Die Spielstände werden auf diesem Gerät gespeichert.'
+        : 'Speichern ist hier gerade nicht möglich. Die Leben bleiben nur erhalten, solange diese Seite geöffnet ist.';
+    }
+    var a = document.getElementById('save-note');
+    var b = document.getElementById('roster-note');
+    a.textContent = storageOk
+      ? 'Die Spielstände werden auf diesem Gerät gespeichert.'
+      : 'Speichern ist hier gerade nicht möglich. Die Punkte bleiben nur erhalten, solange diese Seite geöffnet ist.';
+    b.textContent = storageOk
+      ? 'Namen und Fotos bleiben auf diesem Gerät gespeichert. Lege sie deshalb auf dem Gerät an, das ihr am Spieltisch benutzt. Je nach Gerät kannst du ein Foto aus der Galerie wählen oder ein neues aufnehmen.'
+      : 'Speichern ist hier gerade nicht möglich. Namen und Fotos bleiben nur erhalten, solange diese Seite geöffnet ist.';
+  }
+
+  /* ---------- Foto verkleinern ---------- */
+  function toAvatar(file, cb) {
+    var fr = new FileReader();
+    fr.onerror = function () { cb(null); };
+    fr.onload = function () {
+      var img = new Image();
+      img.onerror = function () { cb(null); };
+      img.onload = function () {
+        try {
+          var s = Math.min(img.width, img.height);
+          var sx = (img.width - s) / 2, sy = (img.height - s) / 2;
+          var c = document.createElement('canvas');
+          c.width = 192; c.height = 192;
+          c.getContext('2d').drawImage(img, sx, sy, s, s, 0, 0, 192, 192);
+          cb(c.toDataURL('image/jpeg', 0.82));
+        } catch (e) { cb(null); }
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+
+  /* ---------- Startseite ---------- */
+  function renderHome() { /* Startseite ist statisch */ }
+
+  /* ---------- Spielerseite ---------- */
+  var rosterMsg = document.getElementById('roster-msg');
+  var addRosterBtn = document.getElementById('add-roster');
+
+  function renderRoster() {
+    var box = document.getElementById('roster-root');
+    box.textContent = '';
+    roster.list.forEach(function (pl) {
+      var av = avatarEl(pl, 'lg');
+      var name = h('input', { type: 'text', class: 'pname', maxlength: '14', id: 'rname-' + pl.id, 'aria-label': 'Name' });
+      name.value = pl.name;
+      name.addEventListener('input', function () {
+        pl.name = name.value;
+        saveRoster();
+        if (!pl.photo) av.textContent = initial(pl.name);
+      });
+
+      var file = h('input', { type: 'file', accept: 'image/*', class: 'sr' });
+      var pick = h('label', { class: 'btn small' }, [pl.photo ? 'Foto ändern' : 'Foto wählen', file]);
+      file.addEventListener('change', function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        rosterMsg.textContent = 'Foto wird verarbeitet …';
+        toAvatar(f, function (url) {
+          if (!url) { rosterMsg.textContent = 'Dieses Foto konnte nicht gelesen werden. Probiere ein anderes.'; return; }
+          pl.photo = url;
+          saveRoster();
+          rosterMsg.textContent = '';
+          renderRoster();
+        });
+      });
+
+      var row = h('div', { class: 'row' }, [pick]);
+      if (pl.photo) {
+        var rp = h('button', { type: 'button', class: 'mini', text: 'Foto entfernen' });
+        rp.addEventListener('click', function () { pl.photo = null; saveRoster(); renderRoster(); });
+        row.appendChild(rp);
+      }
+      if (roster.list.length > 2) {
+        var del = h('button', { type: 'button', class: 'mini' });
+        twoStep(del, 'Spieler löschen', 'Wirklich löschen?', function () {
+          roster.list = roster.list.filter(function (x) { return x.id !== pl.id; });
+          saveRoster();
+          fixGame();
+          saveGame();
+          fixW();
+          saveW();
+          fixS();
+          saveS();
+          fixSh();
+          saveSh();
+          renderRoster();
+        });
+        row.appendChild(del);
+      }
+      box.appendChild(h('div', { class: 'pcard' }, [av, h('div', { class: 'body' }, [name, row])]));
+    });
+    addRosterBtn.disabled = roster.list.length >= MAXR;
+  }
+
+  addRosterBtn.addEventListener('click', function () {
+    if (roster.list.length >= MAXR) return;
+    var id = 'p' + roster.next;
+    roster.next++;
+    roster.list.push({ id: id, name: 'Spieler ' + (roster.list.length + 1), photo: null });
+    saveRoster();
+    renderRoster();
+    var f = document.getElementById('rname-' + id);
+    if (f) { f.focus(); f.select(); }
+  });
+
+  /* ---------- Punktetabelle ---------- */
+  function result(r) {
+    var vals = r.pts.map(function (v) { return v === '' || v === null ? null : Number(v); });
+    if (vals.some(function (v) { return v === null || isNaN(v); })) return null;
+    var min = Math.min.apply(null, vals);
+    var idx = [];
+    vals.forEach(function (v, i) { if (v === min) idx.push(i); });
+    var tie = idx.length > 1;
+    if (tie && r.caller !== null && idx.indexOf(r.caller) !== -1) idx = [r.caller];
+    return { winners: idx, tie: tie };
+  }
+
+  var root = document.getElementById('score-root');
+  var refs = null;
+  var pickerOpen = false;
+
+  function render() {
+    var n = game.ids.length;
+    refs = { rows: [], wins: [], sums: [], banner: h('div', { class: 'banner', role: 'status', hidden: '' }) };
+    root.textContent = '';
+    root.appendChild(refs.banner);
+
+    var table = h('table', { class: 'score' });
+    table.appendChild(h('caption', { class: 'sr', text: 'Punktetabelle Yasif' }));
+
+    var thead = h('thead');
+    var hr = h('tr');
+    hr.appendChild(h('th', { scope: 'col', class: 'rc', text: 'Runde' }));
+    game.ids.forEach(function (id, p) {
+      var box = h('div', { class: 'ph' }, [avatarEl(player(id), ''), h('span', { class: 'pn', text: pname(id) }), mover(p, n, moveGameColumn)]);
+      if (n > 2) {
+        var rm = h('button', { type: 'button', class: 'mini' });
+        twoStep(rm, 'Entfernen', 'Sicher?', function () { removeColumn(p); saveGame(); render(); });
+        box.appendChild(rm);
+      }
+      hr.appendChild(h('th', { scope: 'col' }, [box]));
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    var tbody = h('tbody');
+    game.rounds.forEach(function (r, ri) {
+      var tr = h('tr', { class: 'round' });
+      tr.appendChild(h('th', { scope: 'row', class: 'rc', text: String(ri + 1) }));
+      var cells = [];
+      game.ids.forEach(function (id, p) {
+        var inp = h('input', { type: 'number', class: 'pts', inputmode: 'numeric', min: '0', max: '999', step: '1', id: 'pts-' + ri + '-' + p, 'aria-label': 'Punkte Runde ' + (ri + 1) + ', ' + pname(id) });
+        inp.value = r.pts[p];
+        inp.addEventListener('input', function () { r.pts[p] = inp.value; saveGame(); refresh(); });
+        var btn = h('button', { type: 'button', class: 'caller', text: 'Schluss', 'aria-pressed': 'false' });
+        btn.addEventListener('click', function () { r.caller = (r.caller === p) ? null : p; saveGame(); refresh(); });
+        var check = h('span', { class: 'check', 'aria-hidden': 'true', text: '✓' });
+        var stand = h('div', { class: 'stand' });
+        var td = h('td', null, [inp, h('div', { class: 'cellrow' }, [btn, check]), stand]);
+        tr.appendChild(td);
+        cells.push({ td: td, btn: btn, stand: stand });
+      });
+      tbody.appendChild(tr);
+
+      var str = h('tr', { class: 'statusrow' });
+      var stext = h('span', { class: 'status' });
+      var del = h('button', { type: 'button', class: 'mini' });
+      twoStep(del, 'Runde löschen', 'Sicher?', function () { removeRound(ri); });
+      str.appendChild(h('td', { colspan: String(n + 1) }, [h('div', { class: 'statusin' }, [stext, del])]));
+      tbody.appendChild(str);
+      refs.rows.push({ cells: cells, status: stext });
+    });
+    table.appendChild(tbody);
+
+    var tfoot = h('tfoot');
+    var wr = h('tr');
+    wr.appendChild(h('th', { scope: 'row', class: 'rc', text: 'Siege' }));
+    var sr = h('tr');
+    sr.appendChild(h('th', { scope: 'row', class: 'rc', text: 'Stand' }));
+    for (var p = 0; p < n; p++) {
+      var w = h('td'); var s = h('td');
+      wr.appendChild(w); sr.appendChild(s);
+      refs.wins.push(w); refs.sums.push(s);
+    }
+    tfoot.appendChild(wr); tfoot.appendChild(sr);
+    table.appendChild(tfoot);
+
+    root.appendChild(h('div', { class: 'table-wrap' }, [table]));
+
+    var actions = h('div', { class: 'actions' });
+    var addRound = h('button', { type: 'button', class: 'btn primary', text: 'Runde hinzufügen' });
+    addRound.addEventListener('click', function () {
+      game.rounds.push(newRound(game.ids.length));
+      saveGame(); render();
+      var f = document.getElementById('pts-' + (game.rounds.length - 1) + '-0');
+      if (f) f.focus();
+    });
+    var addPlayer = h('button', { type: 'button', class: 'btn', text: 'Spieler hinzufügen', 'aria-expanded': pickerOpen ? 'true' : 'false' });
+    if (n >= MAXG) addPlayer.disabled = true;
+    addPlayer.addEventListener('click', function () { pickerOpen = !pickerOpen; render(); });
+    var reset = h('button', { type: 'button', class: 'btn' });
+    twoStep(reset, 'Neues Spiel', 'Wirklich alle Runden löschen?', function () {
+      game.rounds = [newRound(game.ids.length)];
+      game.gid = gidNew();
+      saveGame(); render();
+    });
+    actions.appendChild(addRound);
+    actions.appendChild(addPlayer);
+    actions.appendChild(reset);
+    root.appendChild(actions);
+
+    if (pickerOpen && n < MAXG) {
+      var avail = roster.list.filter(function (pl) { return game.ids.indexOf(pl.id) === -1; });
+      var opts = h('div', { class: 'opts' });
+      avail.forEach(function (pl) {
+        var o = h('button', { type: 'button', class: 'opt' }, [avatarEl(pl, ''), (pl.name || '').trim() || 'Spieler']);
+        o.addEventListener('click', function () { addColumn(pl.id); pickerOpen = false; saveGame(); render(); });
+        opts.appendChild(o);
+      });
+      var picker = h('div', { class: 'picker' }, [
+        h('p', { text: avail.length ? 'Wer soll mitspielen?' : 'Alle Spieler aus der Liste spielen schon mit.' }),
+        avail.length ? opts : null,
+        h('a', { href: '#spieler', text: 'Neuen Spieler anlegen →' })
+      ]);
+      root.appendChild(picker);
+    }
+
+    refresh();
+  }
+
+  /* Punktestand: Rundensieger bekommt 0, alle anderen ihre Handpunkte.
+     Wer Schluss gemacht hat, aber nicht gewinnt, bekommt 15 Strafpunkte dazu.
+     Genau 50 -> 0, genau 100 -> 50, ueber 100 = verloren. */
+  function score() {
+    var n = game.ids.length, tot = [], wins = [], rounds = [], over = null, i;
+    for (i = 0; i < n; i++) { tot.push(0); wins.push(0); }
+    game.rounds.forEach(function (r, ri) {
+      var res = result(r);
+      var info = { cells: [], penalized: null };
+      if (res) {
+        for (var p = 0; p < n; p++) {
+          var isWin = res.winners.indexOf(p) !== -1;
+          var hand = Number(r.pts[p]);
+          var pen = (r.caller === p && !isWin) ? 15 : 0;
+          var add = isWin ? 0 : hand + pen;
+          if (pen) info.penalized = p;
+          var raw = tot[p] + add, shown = raw, reset = null;
+          if (raw === 50) { shown = 0; reset = 0; }
+          else if (raw === 100) { shown = 50; reset = 50; }
+          tot[p] = shown;
+          if (isWin) wins[p]++;
+          info.cells.push({ add: add, hand: hand, pen: pen, raw: raw, reset: reset });
+        }
+        if (!over) {
+          var losers = [];
+          for (var q = 0; q < n; q++) if (tot[q] > 100) losers.push(q);
+          if (losers.length) over = { round: ri, losers: losers, totals: tot.slice() };
+        }
+      }
+      rounds.push(info);
+    });
+    return { rounds: rounds, total: tot, wins: wins, over: over };
+  }
+
+  function refresh() {
+    var n = game.ids.length;
+    var sc = score();
+    recordYasif(sc);
+
+    game.rounds.forEach(function (r, ri) {
+      var res = result(r);
+      var winners = res ? res.winners : [];
+      var info = sc.rounds[ri];
+      var row = refs.rows[ri];
+      row.cells.forEach(function (c, p) {
+        c.td.classList.toggle('win', winners.indexOf(p) !== -1);
+        c.btn.setAttribute('aria-pressed', r.caller === p ? 'true' : 'false');
+        var ci = info.cells[p];
+        if (ci) {
+          c.stand.textContent = (ci.pen ? '+' + ci.hand + ' +' + ci.pen + ' Strafe' : '+' + ci.add) + ' = ' + ci.raw + (ci.reset !== null ? ' → ' + ci.reset : '');
+          c.stand.className = 'stand' + (ci.reset !== null ? ' reset' : '');
+        } else {
+          c.stand.textContent = '';
+          c.stand.className = 'stand';
+        }
+      });
+
+      var txt, cls = 'status';
+      var cv = r.caller !== null && r.pts[r.caller] !== '' ? Number(r.pts[r.caller]) : null;
+      var filled = r.pts.filter(function (v) { return v !== ''; }).length;
+      if (cv !== null && !isNaN(cv) && cv > 6) {
+        txt = pname(game.ids[r.caller]) + ' hat Schluss gemacht, aber Schluss geht nur mit 6 Punkten oder weniger.';
+        cls += ' warn';
+      } else if (!res) {
+        txt = filled === 0 ? 'Punkte eintragen' : 'Es fehlen noch Punkte.';
+      } else if (winners.length === 1) {
+        txt = 'Sieg: ' + pname(game.ids[winners[0]]) + (res.tie ? ' (Gleichstand, hat Schluss gemacht)' : '');
+        cls += ' ok';
+      } else {
+        txt = 'Gleichstand: ' + winners.map(function (p) { return pname(game.ids[p]); }).join(' und ');
+        cls += ' ok';
+      }
+      if (info.penalized !== null && cls.indexOf('warn') === -1) {
+        txt += '. ' + pname(game.ids[info.penalized]) + ' hat Schluss gemacht, aber nicht gewonnen: +15 Strafpunkte.';
+      }
+      row.status.textContent = txt;
+      row.status.className = cls;
+    });
+
+    for (var p = 0; p < n; p++) {
+      refs.wins[p].textContent = String(sc.wins[p]);
+      refs.sums[p].textContent = String(sc.total[p]);
+      refs.sums[p].classList.toggle('lose', !!sc.over && sc.over.losers.indexOf(p) !== -1);
+    }
+    if (sc.over) {
+      var names = sc.over.losers.map(function (q) { return pname(game.ids[q]); });
+      refs.banner.textContent = 'Spiel vorbei: ' + (names.length === 1
+        ? names[0] + ' ist über 100 Punkte gekommen und verliert.'
+        : names.join(' und ') + ' sind über 100 Punkte gekommen und verlieren.');
+      refs.banner.hidden = false;
+    } else {
+      refs.banner.hidden = true;
+    }
+  }
+
+  function removeRound(ri) {
+    if (game.rounds.length > 1) game.rounds.splice(ri, 1);
+    else game.rounds[0] = newRound(game.ids.length);
+    saveGame(); render();
+  }
+
+  /* ---------- Fortgeschrittene Regel ---------- */
+  var sw = document.getElementById('adv-switch');
+  function applyAdv() {
+    var on = !!settings.advanced;
+    sw.setAttribute('aria-checked', on ? 'true' : 'false');
+    sw.querySelector('.lbl').textContent = on ? 'An' : 'Aus';
+    document.querySelectorAll('[data-adv="on"]').forEach(function (e) { e.hidden = !on; });
+  }
+  sw.addEventListener('click', function () {
+    settings.advanced = !settings.advanced;
+    write(K_SET, settings);
+    applyAdv();
+  });
+
+  /* ---------- Wuerfeln (10.000) ---------- */
+  var K_W = 'spielebox.wuerfeln.v1';
+  var GOAL = 10000;
+  var STRASSE = 1500;   /* Punkte fuer Strasse 1-6 (nur im ersten Wurf) */
+  var PAARE = 1200;     /* Punkte fuer drei Paerchen (nur mit 6 Wuerfeln) */
+  var FACE = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+  if (typeof settings.takeover !== 'boolean') settings.takeover = false;
+
+  function fmt(n) { try { return Number(n).toLocaleString('de-DE'); } catch (e) { return String(n); } }
+  function emptyCell() { return { v: '', bust: false }; }
+  function newRow(n) { var r = []; for (var i = 0; i < n; i++) r.push(emptyCell()); return r; }
+  function filled(c) { return !!c && (c.bust || (c.v !== '' && c.v !== null && !isNaN(Number(c.v)))); }
+  /* Laufender Zug: pts = eigene Eingabe, carry = Uebernahme vom Vorspieler, left = Wuerfel, die beim Aufhoeren noch liegen */
+  function freshTurn(p) { return { p: p || 0, pts: '', carry: null, left: 6 }; }
+  function normTurn(t) {
+    var p = (t && typeof t.p === 'number') ? t.p : 0;
+    var pts = '';
+    if (t && Array.isArray(t.throws)) {
+      var s = 0;
+      t.throws.forEach(function (th) { s += Number(th.pts) || 0; });
+      if (s > 0) pts = s;
+    } else if (t && t.pts !== undefined && t.pts !== '' && t.pts !== null && !isNaN(Number(t.pts))) {
+      pts = Number(t.pts);
+    }
+    var carry = (t && t.carry && typeof t.carry.pts === 'number' && typeof t.carry.dice === 'number') ? { pts: t.carry.pts, dice: t.carry.dice } : null;
+    var left = (t && typeof t.left === 'number' && t.left >= 1 && t.left <= 6) ? t.left : 6;
+    return { p: p, pts: pts, carry: carry, left: left };
+  }
+
+  var W = read(K_W);
+  if (!W || !Array.isArray(W.ids) || !Array.isArray(W.rounds)) {
+    W = { ids: [roster.list[0].id, roster.list[1].id], rounds: [newRow(2)], turn: freshTurn(0), last: null };
+  }
+  function saveW() { write(K_W, W); }
+
+  function wRemoveColumn(p) {
+    W.ids.splice(p, 1);
+    W.rounds.forEach(function (row) { if (Array.isArray(row)) row.splice(p, 1); });
+    if (W.turn && W.turn.p === p) W.turn = freshTurn(0);
+    else if (W.turn && W.turn.p > p) W.turn.p--;
+    if (W.last && W.last.p === p) W.last = null;
+    else if (W.last && W.last.p > p) W.last.p--;
+  }
+  function wAddColumn(id) {
+    W.ids.push(id);
+    W.rounds.forEach(function (row) { row.push(emptyCell()); });
+  }
+  function fixW() {
+    W.turn = normTurn(W.turn);
+    for (var i = W.ids.length - 1; i >= 0; i--) {
+      if (!player(W.ids[i]) || W.ids.indexOf(W.ids[i]) !== i) wRemoveColumn(i);
+    }
+    for (var j = 0; j < roster.list.length && W.ids.length < 2; j++) {
+      if (W.ids.indexOf(roster.list[j].id) === -1) wAddColumn(roster.list[j].id);
+    }
+    if (typeof W.turn.p !== 'number' || W.turn.p < 0 || W.turn.p >= W.ids.length) W.turn = freshTurn(0);
+    if (!W.rounds.length) W.rounds = [newRow(W.ids.length)];
+    W.rounds.forEach(function (row, ri) {
+      if (!Array.isArray(row)) { row = []; W.rounds[ri] = row; }
+      while (row.length < W.ids.length) row.push(emptyCell());
+      row.length = W.ids.length;
+      for (var k = 0; k < row.length; k++) {
+        if (!row[k] || typeof row[k] !== 'object') row[k] = emptyCell();
+        if (row[k].v === undefined) row[k].v = '';
+        row[k].bust = !!row[k].bust;
+      }
+    });
+    if (W.last && (typeof W.last.p !== 'number' || W.last.p >= W.ids.length)) W.last = null;
+  }
+
+  /* Bombe: Zahl f, n gleiche Wuerfel (ab 3), jeder weitere verdoppelt */
+  function bombPts(f, n) { return (f === 1 ? 1000 : f * 100) * Math.pow(2, n - 3); }
+
+  /* Reihenfolge: zwei Spalten tauschen */
+  function swapIdx(i, j, k) { return k === i ? j : (k === j ? i : k); }
+
+  function mover(p, n, fn) {
+    var l = h('button', { type: 'button', class: 'mv', 'aria-label': 'Nach links', text: '←' });
+    var r = h('button', { type: 'button', class: 'mv', 'aria-label': 'Nach rechts', text: '→' });
+    l.disabled = p <= 0;
+    r.disabled = p >= n - 1;
+    l.addEventListener('click', function () { fn(p, -1); });
+    r.addEventListener('click', function () { fn(p, 1); });
+    return h('div', { class: 'mvs' }, [l, r]);
+  }
+
+  function moveGameColumn(i, dir) {
+    var j = i + dir;
+    if (j < 0 || j >= game.ids.length) return;
+    var t = game.ids[i]; game.ids[i] = game.ids[j]; game.ids[j] = t;
+    game.rounds.forEach(function (r) {
+      var x = r.pts[i]; r.pts[i] = r.pts[j]; r.pts[j] = x;
+      if (r.caller !== null) r.caller = swapIdx(i, j, r.caller);
+    });
+    saveGame();
+    render();
+  }
+
+  function wMoveColumn(i, dir) {
+    var j = i + dir;
+    if (j < 0 || j >= W.ids.length) return;
+    var t = W.ids[i]; W.ids[i] = W.ids[j]; W.ids[j] = t;
+    W.rounds.forEach(function (row) { var x = row[i]; row[i] = row[j]; row[j] = x; });
+    W.turn.p = swapIdx(i, j, W.turn.p);
+    if (W.last) W.last.p = swapIdx(i, j, W.last.p);
+    saveW();
+    renderWScore();
+  }
+
+  var vDice = document.getElementById('view-dice');
+  var dpRules = document.getElementById('dpanel-rules');
+  var dpScore = document.getElementById('dpanel-score');
+  var dtRules = document.getElementById('dtab-rules');
+  var dtScore = document.getElementById('dtab-score');
+  var dTurn = document.getElementById('d-turn');
+  var dRoot = document.getElementById('d-root');
+  var wRefs = null;
+  var wPickerOpen = false;
+  var tRefs = null;
+
+  /* Punkte des laufenden Zugs: eigene Eingabe plus Uebernahme (zaehlt, sobald man punktet) */
+  function turnTotal() {
+    var t = W.turn;
+    var own = t.pts === '' ? 0 : (Number(t.pts) || 0);
+    var applied = !!(t.carry && own > 0);
+    return { own: own, applied: applied, total: own + (applied ? t.carry.pts : 0) };
+  }
+
+  function updateTurnDerived() {
+    var t = W.turn, tt = turnTotal();
+    var valid = tt.own >= 0 && tt.own % 50 === 0;
+    tRefs.bank.textContent = 'Aufschreiben: +' + fmt(valid ? tt.total : 0);
+    tRefs.bank.disabled = !valid || tt.total <= 0;
+    tRefs.warn.hidden = valid;
+    if (tRefs.sum) {
+      tRefs.sum.textContent = 'Zusammen mit der Übernahme: ' + fmt(tt.total) + ' Punkte' + (tt.applied ? '' : ' (zählt erst, wenn du punktest)');
+    }
+  }
+
+  function addPts(x) {
+    var own = W.turn.pts === '' ? 0 : (Number(W.turn.pts) || 0);
+    W.turn.pts = own + x;
+    tRefs.inp.value = W.turn.pts;
+    saveW();
+    updateTurnDerived();
+  }
+
+  function finishTurn(bust) {
+    var t = W.turn, tt = turnTotal();
+    var p = t.p, n = W.ids.length;
+    var row = W.rounds[W.rounds.length - 1];
+    if (!row || filled(row[p])) { row = newRow(n); W.rounds.push(row); }
+    if (bust) { row[p] = { v: 0, bust: true }; W.last = null; }
+    else { row[p] = { v: tt.total, bust: false }; W.last = { p: p, pts: tt.total, left: t.left }; }
+    if (row.every(filled)) W.rounds.push(newRow(n));
+    W.turn = freshTurn((p + 1) % n);
+    saveW();
+    renderWScore();
+  }
+
+  function renderTurn() {
+    var t = W.turn, n = W.ids.length;
+    var own = t.pts === '' ? 0 : (Number(t.pts) || 0);
+    var pid = W.ids[t.p];
+    dTurn.textContent = '';
+    tRefs = {};
+
+    dTurn.appendChild(h('div', { class: 'thead' }, [
+      avatarEl(player(pid), 'lg'),
+      h('div', null, [h('p', { class: 'who-l', text: 'Jetzt dran' }), h('h2', { text: pname(pid) })])
+    ]));
+
+    if (own === 0 && !t.carry && n > 1) {
+      var chips = h('div', { class: 'opts', role: 'group', 'aria-label': 'Wer ist dran?' });
+      W.ids.forEach(function (id, p) {
+        var b = h('button', { type: 'button', class: 'opt', 'aria-pressed': p === t.p ? 'true' : 'false' }, [avatarEl(player(id), ''), pname(id)]);
+        b.addEventListener('click', function () { W.turn.p = p; saveW(); renderTurn(); });
+        chips.appendChild(b);
+      });
+      dTurn.appendChild(chips);
+    }
+
+    if (settings.takeover && !t.carry && own === 0 && W.last && W.last.p !== t.p) {
+      var tk = h('button', { type: 'button', class: 'btn', text: 'Übernehmen: ' + fmt(W.last.pts) + ' Punkte von ' + pname(W.ids[W.last.p]) + ' mit ' + W.last.left + ' Würfeln' });
+      tk.addEventListener('click', function () {
+        W.turn.carry = { pts: W.last.pts, dice: W.last.left };
+        W.turn.left = W.last.left;
+        saveW();
+        renderTurn();
+      });
+      dTurn.appendChild(h('div', { class: 'combo' }, [tk]));
+    }
+
+    var inp = h('input', { type: 'number', id: 'turn-pts', class: 'pts big', min: '0', step: '50', inputmode: 'numeric', placeholder: '0' });
+    inp.value = t.pts;
+    inp.addEventListener('input', function () {
+      W.turn.pts = inp.value === '' ? '' : Number(inp.value);
+      saveW();
+      updateTurnDerived();
+    });
+    tRefs.inp = inp;
+    dTurn.appendChild(h('label', { class: 'pfield' }, [
+      h('span', { class: 'lab', text: 'Punkte in diesem Zug (noch nicht gesichert)' }),
+      inp,
+      h('span', { class: 'sub', text: 'Rechne selbst und trage die Summe ein: zum Merken, wenn du weiterwürfelst, oder zum Aufschreiben.' })
+    ]));
+    tRefs.warn = h('p', { class: 'note warn', text: 'Punkte gehen in 50er-Schritten, zum Beispiel 350 oder 1.050.', hidden: '' });
+    dTurn.appendChild(tRefs.warn);
+
+    dTurn.appendChild(h('p', { class: 'note', text: 'Zum Dazurechnen antippen:' }));
+    var quick = h('div', { class: 'combo' });
+    [['Eine 1: +100', 100], ['Eine 5: +50', 50], ['Straße: +' + fmt(STRASSE), STRASSE], ['Drei Pärchen: +' + fmt(PAARE), PAARE]].forEach(function (q) {
+      var b = h('button', { type: 'button', class: 'btn', text: q[0] });
+      b.addEventListener('click', function () { addPts(q[1]); });
+      quick.appendChild(b);
+    });
+    dTurn.appendChild(quick);
+    dTurn.appendChild(h('p', { class: 'note', text: 'Straße und Drei Pärchen gehen nur mit allen 6 Würfeln in der Hand: im ersten Wurf oder nach einem Übertrag. Das kann in einem Zug auch mehrmals passieren.' }));
+
+    var grid = h('div', { class: 'bombgrid' });
+    grid.appendChild(h('span'));
+    [3, 4, 5, 6].forEach(function (c) { grid.appendChild(h('span', { class: 'hd', text: c + ' gleiche' })); });
+    [1, 2, 3, 4, 5, 6].forEach(function (f) {
+      grid.appendChild(h('span', { class: 'dc' + (f === 1 ? ' r' : ''), 'aria-hidden': 'true', text: FACE[f - 1] }));
+      [3, 4, 5, 6].forEach(function (c) {
+        var v = bombPts(f, c);
+        var b = h('button', { type: 'button', class: 'bb', 'aria-label': c + ' mal die ' + f + ', plus ' + fmt(v), text: fmt(v) });
+        b.addEventListener('click', function () { addPts(v); });
+        grid.appendChild(b);
+      });
+    });
+    dTurn.appendChild(h('details', { class: 'manual' }, [h('summary', { text: 'Bombe antippen' }), grid, h('p', { class: 'note', text: 'Zwei Fünfen aus demselben Wurf dürfen als eine 1 zählen.' })]));
+
+    if (t.carry) {
+      dTurn.appendChild(h('p', { class: 'note', text: 'Übernommen von deinem Vorspieler: ' + fmt(t.carry.pts) + ' Punkte. Du würfelst nur mit ' + t.carry.dice + ' Würfeln. Die Punkte zählen, sobald du punktest.' }));
+      tRefs.sum = h('p', { class: 'tot' });
+      dTurn.appendChild(tRefs.sum);
+      if (own === 0) {
+        var cancel = h('button', { type: 'button', class: 'mini', text: 'Übernahme abbrechen' });
+        cancel.addEventListener('click', function () { W.turn.carry = null; W.turn.left = 6; saveW(); renderTurn(); });
+        dTurn.appendChild(cancel);
+      }
+    }
+
+    if (settings.takeover) {
+      var lm = h('button', { type: 'button', class: 'step', 'aria-label': 'Ein Würfel weniger', text: '–' });
+      var lp = h('button', { type: 'button', class: 'step', 'aria-label': 'Ein Würfel mehr', text: '+' });
+      lm.disabled = t.left <= 1;
+      lp.disabled = t.left >= 6;
+      lm.addEventListener('click', function () { W.turn.left--; saveW(); renderTurn(); });
+      lp.addEventListener('click', function () { W.turn.left++; saveW(); renderTurn(); });
+      dTurn.appendChild(h('div', { class: 'dleft' }, [
+        h('span', { class: 'lab', text: 'Würfel, die noch liegen, wenn du aufhörst (für die Übernahme)' }),
+        h('div', { class: 'ctl' }, [lm, h('span', { class: 'cnt', text: String(t.left) }), lp])
+      ]));
+    }
+
+    var bank = h('button', { type: 'button', class: 'btn primary' });
+    bank.addEventListener('click', function () { finishTurn(false); });
+    tRefs.bank = bank;
+    var bust = h('button', { type: 'button', class: 'btn' });
+    twoStep(bust, 'Verwürfelt (0 Punkte)', 'Wirklich verwürfelt?', function () { finishTurn(true); });
+    dTurn.appendChild(h('div', { class: 'actions' }, [bank, bust]));
+
+    updateTurnDerived();
+  }
+
+  function renderTable() {
+    var n = W.ids.length;
+    wRefs = { cells: [], tot: [], left: [], banner: h('div', { class: 'banner good', role: 'status', hidden: '' }) };
+    dRoot.textContent = '';
+    dRoot.appendChild(wRefs.banner);
+
+    var table = h('table', { class: 'score' });
+    table.appendChild(h('caption', { class: 'sr', text: 'Punktetabelle Würfeln' }));
+    var hr = h('tr', null, [h('th', { scope: 'col', class: 'rc', text: 'Runde' })]);
+    W.ids.forEach(function (id, p) {
+      var box = h('div', { class: 'ph' }, [avatarEl(player(id), ''), h('span', { class: 'pn', text: pname(id) }), mover(p, n, wMoveColumn)]);
+      if (n > 2) {
+        var rm = h('button', { type: 'button', class: 'mini' });
+        twoStep(rm, 'Entfernen', 'Sicher?', function () { wRemoveColumn(p); saveW(); renderWScore(); });
+        box.appendChild(rm);
+      }
+      hr.appendChild(h('th', { scope: 'col' }, [box]));
+    });
+    table.appendChild(h('thead', null, [hr]));
+
+    var tbody = h('tbody');
+    W.rounds.forEach(function (row, ri) {
+      var tr = h('tr', { class: 'round' }, [h('th', { scope: 'row', class: 'rc', text: String(ri + 1) })]);
+      var cells = [];
+      W.ids.forEach(function (id, p) {
+        var cell = row[p];
+        var inp = h('input', { type: 'number', class: 'pts', inputmode: 'numeric', min: '0', step: '50', id: 'wp-' + ri + '-' + p, 'aria-label': 'Punkte Runde ' + (ri + 1) + ', ' + pname(id) });
+        inp.value = cell.v;
+        var stand = h('div', { class: 'stand' });
+        inp.addEventListener('input', function () {
+          cell.v = inp.value === '' ? '' : Number(inp.value);
+          cell.bust = false;
+          saveW();
+          wRefresh();
+        });
+        tr.appendChild(h('td', null, [inp, stand]));
+        cells.push({ stand: stand });
+      });
+      tbody.appendChild(tr);
+      var del = h('button', { type: 'button', class: 'mini' });
+      twoStep(del, 'Runde löschen', 'Sicher?', function () { wRemoveRound(ri); });
+      tbody.appendChild(h('tr', { class: 'statusrow' }, [
+        h('td', { colspan: String(n + 1) }, [h('div', { class: 'statusin' }, [h('span'), del])])
+      ]));
+      wRefs.cells.push(cells);
+    });
+    table.appendChild(tbody);
+
+    var tf = h('tfoot');
+    var sr = h('tr', null, [h('th', { scope: 'row', class: 'rc', text: 'Stand' })]);
+    var gr = h('tr', { class: 'goal' }, [h('th', { scope: 'row', class: 'rc', text: 'Noch offen' })]);
+    for (var q = 0; q < n; q++) {
+      var a = h('td'), b = h('td');
+      sr.appendChild(a); gr.appendChild(b);
+      wRefs.tot.push(a); wRefs.left.push(b);
+    }
+    tf.appendChild(sr); tf.appendChild(gr);
+    table.appendChild(tf);
+    dRoot.appendChild(h('div', { class: 'table-wrap' }, [table]));
+
+    var actions = h('div', { class: 'actions' });
+    var addRound = h('button', { type: 'button', class: 'btn', text: 'Runde hinzufügen' });
+    addRound.addEventListener('click', function () { W.rounds.push(newRow(W.ids.length)); saveW(); renderTable(); });
+    var addP = h('button', { type: 'button', class: 'btn', text: 'Spieler hinzufügen', 'aria-expanded': wPickerOpen ? 'true' : 'false' });
+    if (n >= MAXG) addP.disabled = true;
+    addP.addEventListener('click', function () { wPickerOpen = !wPickerOpen; renderTable(); });
+    var reset = h('button', { type: 'button', class: 'btn' });
+    twoStep(reset, 'Neues Spiel', 'Wirklich alle Runden löschen?', function () {
+      W.rounds = [newRow(W.ids.length)];
+      W.gid = gidNew();
+      W.turn = freshTurn(0);
+      W.last = null;
+      saveW();
+      renderWScore();
+    });
+    actions.appendChild(addRound);
+    actions.appendChild(addP);
+    actions.appendChild(reset);
+    dRoot.appendChild(actions);
+
+    if (wPickerOpen && n < MAXG) {
+      var avail = roster.list.filter(function (pl) { return W.ids.indexOf(pl.id) === -1; });
+      var opts = h('div', { class: 'opts' });
+      avail.forEach(function (pl) {
+        var o = h('button', { type: 'button', class: 'opt' }, [avatarEl(pl, ''), (pl.name || '').trim() || 'Spieler']);
+        o.addEventListener('click', function () { wAddColumn(pl.id); wPickerOpen = false; saveW(); renderWScore(); });
+        opts.appendChild(o);
+      });
+      dRoot.appendChild(h('div', { class: 'picker' }, [
+        h('p', { text: avail.length ? 'Wer soll mitspielen?' : 'Alle Spieler aus der Liste spielen schon mit.' }),
+        avail.length ? opts : null,
+        h('a', { href: '#spieler', text: 'Neuen Spieler anlegen →' })
+      ]));
+    }
+    wRefresh();
+  }
+
+  /* Spielende: Wer 10.000 erreicht, loest die letzte Runde aus. Alle anderen haben danach noch je einen Zug. */
+  function wOutcome() {
+    var n = W.ids.length, cum = [], done = [], standAt = [], trigger = null, i;
+    for (i = 0; i < n; i++) { cum.push(0); done.push(false); }
+    W.rounds.forEach(function (row, ri) {
+      standAt.push([]);
+      for (var p = 0; p < n; p++) {
+        var c = row[p];
+        if (filled(c)) {
+          cum[p] += Number(c.v) || 0;
+          standAt[ri][p] = cum[p];
+          if (trigger === null) { if (cum[p] >= GOAL) trigger = p; }
+          else if (p !== trigger) done[p] = true;
+        } else {
+          standAt[ri][p] = null;
+        }
+      }
+    });
+    var over = false, winner = null, waiting = [];
+    if (trigger !== null) {
+      for (i = 0; i < n; i++) if (i !== trigger && !done[i]) waiting.push(i);
+      over = waiting.length === 0;
+      if (over) {
+        var best = -1;
+        for (i = 0; i < n; i++) if (cum[i] > best) best = cum[i];
+        winner = cum[trigger] === best ? trigger : cum.indexOf(best);
+      }
+    }
+    return { cum: cum, standAt: standAt, trigger: trigger, waiting: waiting, over: over, winner: winner };
+  }
+
+  function wRefresh() {
+    var n = W.ids.length, o = wOutcome(), i;
+    recordW(o);
+    W.rounds.forEach(function (row, ri) {
+      for (var p = 0; p < n; p++) {
+        var st = wRefs.cells[ri][p].stand;
+        st.textContent = o.standAt[ri][p] === null ? '' : (row[p].bust ? 'verwürfelt · ' : '') + 'Stand ' + fmt(o.standAt[ri][p]);
+      }
+    });
+    for (i = 0; i < n; i++) {
+      wRefs.tot[i].textContent = fmt(o.cum[i]);
+      wRefs.tot[i].classList.toggle('top', o.over && o.winner === i);
+      wRefs.left[i].textContent = o.cum[i] >= GOAL ? 'geschafft' : fmt(GOAL - o.cum[i]);
+    }
+    if (o.over) {
+      wRefs.banner.textContent = 'Spiel vorbei: ' + pname(W.ids[o.winner]) + ' gewinnt mit ' + fmt(o.cum[o.winner]) + ' Punkten.';
+      wRefs.banner.hidden = false;
+    } else if (o.trigger !== null) {
+      wRefs.banner.textContent = 'Letzte Runde: ' + pname(W.ids[o.trigger]) + ' hat ' + fmt(GOAL) + ' Punkte erreicht. Noch einen Zug haben: ' + o.waiting.map(function (q) { return pname(W.ids[q]); }).join(', ') + '.';
+      wRefs.banner.hidden = false;
+    } else {
+      wRefs.banner.hidden = true;
+    }
+  }
+
+  function wRemoveRound(ri) {
+    if (W.rounds.length > 1) W.rounds.splice(ri, 1);
+    else W.rounds[0] = newRow(W.ids.length);
+    saveW();
+    renderTable();
+  }
+
+  function renderWScore() { renderTurn(); renderTable(); }
+
+  var tsw = document.getElementById('take-switch');
+  function applyTake() {
+    var on = !!settings.takeover;
+    tsw.setAttribute('aria-checked', on ? 'true' : 'false');
+    tsw.querySelector('.lbl').textContent = on ? 'An' : 'Aus';
+  }
+  tsw.addEventListener('click', function () {
+    settings.takeover = !settings.takeover;
+    write(K_SET, settings);
+    applyTake();
+  });
+
+  fixW();
+  if (!W.gid) W.gid = gidNew();
+  saveW();
+  applyTake();
+
+  /* ---------- Schwimmen (31) ---------- */
+  var K_S = 'spielebox.schwimmen.v1';
+  var S = read(K_S);
+  if (!S || !Array.isArray(S.ids) || !Array.isArray(S.rounds)) {
+    S = { ids: [roster.list[0].id, roster.list[1].id], lives: 3, dealer: 0, rounds: [] };
+  }
+  function sCell() { return { lost: false, fire: false }; }
+  function sRow(n) { var r = [], i; for (i = 0; i < n; i++) r.push(sCell()); return r; }
+  function saveS() { write(K_S, S); }
+  function sMarked(row) { return row.some(function (c) { return c.lost || c.fire; }); }
+
+  function sRemoveColumn(p) {
+    S.ids.splice(p, 1);
+    S.rounds.forEach(function (row) { if (Array.isArray(row)) row.splice(p, 1); });
+    if (S.dealer === p) S.dealer = 0;
+    else if (S.dealer > p) S.dealer--;
+  }
+  function sAddColumn(id) {
+    S.ids.push(id);
+    S.rounds.forEach(function (row) { row.push(sCell()); });
+  }
+  function fixS() {
+    var i, j;
+    S.rounds = S.rounds.filter(Array.isArray);
+    for (i = S.ids.length - 1; i >= 0; i--) {
+      if (!player(S.ids[i]) || S.ids.indexOf(S.ids[i]) !== i) sRemoveColumn(i);
+    }
+    for (j = 0; j < roster.list.length && S.ids.length < 2; j++) {
+      if (S.ids.indexOf(roster.list[j].id) === -1) sAddColumn(roster.list[j].id);
+    }
+    if (typeof S.lives !== 'number' || S.lives < 1 || S.lives > 9) S.lives = 3;
+    if (typeof S.dealer !== 'number' || S.dealer < 0 || S.dealer >= S.ids.length) S.dealer = 0;
+    S.rounds.forEach(function (row) {
+      while (row.length < S.ids.length) row.push(sCell());
+      row.length = S.ids.length;
+      for (var k = 0; k < row.length; k++) {
+        var c = row[k];
+        row[k] = { lost: !!(c && c.lost), fire: !!(c && c.fire) };
+      }
+    });
+    if (!S.rounds.length) S.rounds.push(sRow(S.ids.length));
+    if (!S.gid) S.gid = gidNew();
+  }
+  fixS();
+  saveS();
+
+  function sMoveColumn(i, dir) {
+    var j = i + dir;
+    if (j < 0 || j >= S.ids.length) return;
+    var t = S.ids[i]; S.ids[i] = S.ids[j]; S.ids[j] = t;
+    S.rounds.forEach(function (row) { var x = row[i]; row[i] = row[j]; row[j] = x; });
+    S.dealer = swapIdx(i, j, S.dealer);
+    saveS();
+    sRender();
+  }
+
+  /* naechster Spieler nach "from", der noch nicht ausgeschieden ist */
+  function sNext(from, n, out) {
+    for (var k = 1; k <= n; k++) {
+      var q = (from + k) % n;
+      if (!out[q]) return q;
+    }
+    return from;
+  }
+
+  /* Wer verliert wann ein Leben? Feuer: alle anderen verlieren eines.
+     Ausgeschieden ist, wer mehr Leben verliert, als er hat (bei 0 Leben "schwimmt" er noch). */
+  function sOutcome() {
+    var n = S.ids.length, lives = S.lives, losses = [], out = [], i;
+    for (i = 0; i < n; i++) { losses.push(0); out.push(false); }
+    var rounds = [], over = false, winner = null, tie = null, dealer = S.dealer;
+    S.rounds.forEach(function (row, ri) {
+      var info = { skipped: over, cells: [], dealer: null, start: null, fire: -1, lostAny: false };
+      rounds.push(info);
+      if (over) { for (i = 0; i < n; i++) info.cells.push(null); return; }
+      dealer = ri === 0 ? S.dealer : sNext(dealer, n, out);
+      info.dealer = dealer;
+      info.start = sNext(dealer, n, out);
+      var fireIdx = -1;
+      for (i = 0; i < n; i++) if (!out[i] && row[i].fire && fireIdx < 0) fireIdx = i;
+      info.fire = fireIdx;
+      var newlyOut = [];
+      for (i = 0; i < n; i++) {
+        if (out[i]) { info.cells.push({ inactive: true, left: lives - losses[i], lost: false }); continue; }
+        var lost = fireIdx >= 0 ? i !== fireIdx : !!row[i].lost;
+        if (lost) { losses[i]++; info.lostAny = true; }
+        if (losses[i] > lives) newlyOut.push(i);
+        info.cells.push({ inactive: false, left: lives - losses[i], lost: lost });
+      }
+      newlyOut.forEach(function (q) { out[q] = true; });
+      var alive = [];
+      for (i = 0; i < n; i++) if (!out[i]) alive.push(i);
+      if (alive.length <= 1) {
+        over = true;
+        if (alive.length === 1) winner = alive[0]; else tie = newlyOut.slice();
+      }
+    });
+    return { rounds: rounds, losses: losses, out: out, over: over, winner: winner, tie: tie };
+  }
+
+  function hearts(left, lives) {
+    var s = '', i;
+    for (i = 0; i < left; i++) s += '♥';
+    for (i = Math.max(left, 0); i < lives; i++) s += '♡';
+    return s;
+  }
+
+  var vSwim = document.getElementById('view-swim');
+  var spRules = document.getElementById('spanel-rules');
+  var spScore = document.getElementById('spanel-score');
+  var stRules = document.getElementById('stab-rules');
+  var stScore = document.getElementById('stab-score');
+  var sRoot = document.getElementById('s-root');
+  var sRefs = null;
+  var sPickerOpen = false;
+
+  function sChanged() {
+    var o = sOutcome();
+    var last = S.rounds[S.rounds.length - 1];
+    saveS();
+    if (!o.over && sMarked(last)) {
+      S.rounds.push(sRow(S.ids.length));
+      saveS();
+      sRender();
+    } else {
+      sRefresh();
+    }
+  }
+
+  function sRender() {
+    var n = S.ids.length;
+    sRefs = { rows: [], tot: [], banner: h('div', { class: 'banner', role: 'status', hidden: '' }), msg: h('p', { class: 'note', role: 'status' }) };
+    sRoot.textContent = '';
+    sRoot.appendChild(sRefs.banner);
+
+    var table = h('table', { class: 'score' });
+    table.appendChild(h('caption', { class: 'sr', text: 'Lebenstabelle Schwimmen' }));
+    var thead = h('thead');
+    var hr = h('tr');
+    hr.appendChild(h('th', { scope: 'col', class: 'rc', text: 'Runde' }));
+    S.ids.forEach(function (id, p) {
+      var box = h('div', { class: 'ph' }, [avatarEl(player(id), ''), h('span', { class: 'pn', text: pname(id) }), mover(p, n, sMoveColumn)]);
+      if (n > 2) {
+        var rm = h('button', { type: 'button', class: 'mini' });
+        twoStep(rm, 'Entfernen', 'Sicher?', function () { sRemoveColumn(p); saveS(); sRender(); });
+        box.appendChild(rm);
+      }
+      hr.appendChild(h('th', { scope: 'col' }, [box]));
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    var tbody = h('tbody');
+    S.rounds.forEach(function (row, ri) {
+      var tr = h('tr', { class: 'round' });
+      tr.appendChild(h('th', { scope: 'row', class: 'rc', text: String(ri + 1) }));
+      var cells = [];
+      S.ids.forEach(function (id, p) {
+        var lost = h('button', { type: 'button', class: 'caller', text: 'Verliert', 'aria-pressed': 'false', 'aria-label': 'Verliert ein Leben, Runde ' + (ri + 1) + ', ' + pname(id) });
+        var fire = h('button', { type: 'button', class: 'caller fire', text: 'Feuer', 'aria-pressed': 'false', 'aria-label': 'Feuer, Runde ' + (ri + 1) + ', ' + pname(id) });
+        lost.addEventListener('click', function () {
+          var c = row[p];
+          c.lost = !c.lost;
+          if (c.lost) c.fire = false;
+          sChanged();
+        });
+        fire.addEventListener('click', function () {
+          var c = row[p];
+          if (c.fire) { c.fire = false; }
+          else { row.forEach(function (x) { x.fire = false; x.lost = false; }); c.fire = true; }
+          sChanged();
+        });
+        var stand = h('div', { class: 'stand' });
+        var td = h('td', null, [h('div', { class: 'cellrow sw' }, [lost, fire]), stand]);
+        tr.appendChild(td);
+        cells.push({ td: td, lost: lost, fire: fire, stand: stand });
+      });
+      tbody.appendChild(tr);
+
+      var str = h('tr', { class: 'statusrow' });
+      var stext = h('span', { class: 'status' });
+      var del = h('button', { type: 'button', class: 'mini' });
+      twoStep(del, 'Runde löschen', 'Sicher?', function () {
+        if (S.rounds.length > 1) S.rounds.splice(ri, 1); else S.rounds[0] = sRow(S.ids.length);
+        saveS(); sRender();
+      });
+      str.appendChild(h('td', { colspan: String(n + 1) }, [h('div', { class: 'statusin' }, [stext, del])]));
+      tbody.appendChild(str);
+      sRefs.rows.push({ cells: cells, status: stext });
+    });
+    table.appendChild(tbody);
+
+    var tfoot = h('tfoot');
+    var lr = h('tr');
+    lr.appendChild(h('th', { scope: 'row', class: 'rc', text: 'Leben' }));
+    for (var p = 0; p < n; p++) { var td2 = h('td'); lr.appendChild(td2); sRefs.tot.push(td2); }
+    tfoot.appendChild(lr);
+    table.appendChild(tfoot);
+    sRoot.appendChild(h('div', { class: 'table-wrap' }, [table]));
+
+    var actions = h('div', { class: 'actions' });
+    var addPlayer = h('button', { type: 'button', class: 'btn', text: 'Spieler hinzufügen', 'aria-expanded': sPickerOpen ? 'true' : 'false' });
+    if (n >= MAXG) addPlayer.disabled = true;
+    addPlayer.addEventListener('click', function () { sPickerOpen = !sPickerOpen; sRender(); });
+    var started = S.rounds.some(sMarked);
+    var draw = h('button', { type: 'button', class: 'btn', text: 'Ersten Geber auslosen' });
+    draw.disabled = started;
+    draw.addEventListener('click', function () {
+      S.dealer = Math.floor(Math.random() * S.ids.length);
+      saveS();
+      sRefresh();
+      sRefs.msg.textContent = 'Erster Geber: ' + pname(S.ids[S.dealer]) + '. Es beginnt ' + pname(S.ids[(S.dealer + 1) % S.ids.length]) + '.';
+    });
+    var reset = h('button', { type: 'button', class: 'btn' });
+    twoStep(reset, 'Neues Spiel', 'Wirklich alle Runden löschen?', function () {
+      S.rounds = [sRow(S.ids.length)];
+      S.gid = gidNew();
+      saveS(); sRender();
+    });
+    actions.appendChild(addPlayer);
+    actions.appendChild(draw);
+    actions.appendChild(reset);
+    sRoot.appendChild(actions);
+    sRoot.appendChild(sRefs.msg);
+
+    var lm = h('button', { type: 'button', class: 'step', 'aria-label': 'Ein Leben weniger', text: '–' });
+    var lp = h('button', { type: 'button', class: 'step', 'aria-label': 'Ein Leben mehr', text: '+' });
+    lm.disabled = S.lives <= 1;
+    lp.disabled = S.lives >= 9;
+    lm.addEventListener('click', function () { S.lives--; saveS(); sRender(); });
+    lp.addEventListener('click', function () { S.lives++; saveS(); sRender(); });
+    sRoot.appendChild(h('div', { class: 'dleft' }, [
+      h('span', { class: 'lab', text: 'Leben pro Spieler zu Beginn' }),
+      h('div', { class: 'ctl' }, [lm, h('span', { class: 'cnt', text: String(S.lives) }), lp])
+    ]));
+
+    if (sPickerOpen && n < MAXG) {
+      var avail = roster.list.filter(function (pl) { return S.ids.indexOf(pl.id) === -1; });
+      var opts = h('div', { class: 'opts' });
+      avail.forEach(function (pl) {
+        var o = h('button', { type: 'button', class: 'opt' }, [avatarEl(pl, ''), (pl.name || '').trim() || 'Spieler']);
+        o.addEventListener('click', function () { sAddColumn(pl.id); sPickerOpen = false; saveS(); sRender(); });
+        opts.appendChild(o);
+      });
+      sRoot.appendChild(h('div', { class: 'picker' }, [
+        h('p', { text: avail.length ? 'Wer soll mitspielen?' : 'Alle Spieler aus der Liste spielen schon mit.' }),
+        avail.length ? opts : null,
+        h('a', { href: '#spieler', text: 'Neuen Spieler anlegen →' })
+      ]));
+    }
+    sRefresh();
+  }
+
+  function sRefresh() {
+    var n = S.ids.length, o = sOutcome(), i;
+    recordS(o);
+    S.rounds.forEach(function (row, ri) {
+      var info = o.rounds[ri], r = sRefs.rows[ri];
+      r.cells.forEach(function (c, p) {
+        var ci = info.cells[p];
+        var inactive = info.skipped || !ci || ci.inactive;
+        c.lost.disabled = inactive || info.fire >= 0;
+        c.fire.disabled = inactive;
+        c.lost.setAttribute('aria-pressed', ci && ci.lost ? 'true' : 'false');
+        c.fire.setAttribute('aria-pressed', info.fire === p ? 'true' : 'false');
+        c.td.classList.toggle('dim', !!inactive);
+        if (ci && ci.inactive) {
+          c.stand.textContent = 'raus';
+          c.stand.className = 'stand hl dead';
+        } else if (ci && info.lostAny) {
+          c.stand.textContent = ci.left < 0 ? 'raus' : (ci.left === 0 ? 'schwimmt' : hearts(ci.left, S.lives));
+          c.stand.className = 'stand hl' + (ci.left < 0 ? ' dead' : '');
+        } else {
+          c.stand.textContent = '';
+          c.stand.className = 'stand';
+        }
+      });
+      var parts = [];
+      if (info.skipped) {
+        parts.push('Das Spiel ist schon entschieden.');
+      } else {
+        parts.push('Geber: ' + pname(S.ids[info.dealer]) + ', es beginnt ' + pname(S.ids[info.start]));
+        if (info.fire >= 0) parts.push('Feuer von ' + pname(S.ids[info.fire]) + ': alle anderen verlieren ein Leben');
+        else if (!info.lostAny) parts.push('Wer hat verloren?');
+      }
+      r.status.textContent = parts.join(' · ');
+      r.status.className = 'status' + (info.lostAny ? ' ok' : '');
+    });
+    for (i = 0; i < n; i++) {
+      var left = S.lives - o.losses[i];
+      var td = sRefs.tot[i];
+      td.textContent = left < 0 ? 'raus' : (left === 0 ? 'schwimmt' : hearts(left, S.lives));
+      td.classList.toggle('swim', left === 0);
+      td.classList.toggle('dead', left < 0);
+      td.classList.toggle('top', o.over && o.winner === i);
+    }
+    if (o.over && o.winner !== null) {
+      sRefs.banner.textContent = 'Spiel vorbei: ' + pname(S.ids[o.winner]) + ' gewinnt.';
+      sRefs.banner.className = 'banner good';
+      sRefs.banner.hidden = false;
+    } else if (o.over) {
+      sRefs.banner.textContent = 'Spiel vorbei: ' + o.tie.map(function (q) { return pname(S.ids[q]); }).join(' und ') + ' sind gleichzeitig ausgeschieden. Spielt eine Stichrunde.';
+      sRefs.banner.className = 'banner';
+      sRefs.banner.hidden = false;
+    } else {
+      sRefs.banner.hidden = true;
+    }
+  }
+
+  /* ---------- Shithead ---------- */
+  var K_SH = 'spielebox.shithead.v1';
+  var SH = read(K_SH);
+  if (!SH || !Array.isArray(SH.ids) || !Array.isArray(SH.rounds)) {
+    SH = { ids: [roster.list[0].id, roster.list[1].id], rounds: [null] };
+  }
+  function saveSh() { write(K_SH, SH); }
+  function shRemoveColumn(p) {
+    SH.ids.splice(p, 1);
+    SH.rounds = SH.rounds.map(function (r) { return r === p ? null : (typeof r === 'number' && r > p ? r - 1 : r); });
+  }
+  function shAddColumn(id) { SH.ids.push(id); }
+  function fixSh() {
+    var i, j;
+    for (i = SH.ids.length - 1; i >= 0; i--) {
+      if (!player(SH.ids[i]) || SH.ids.indexOf(SH.ids[i]) !== i) shRemoveColumn(i);
+    }
+    for (j = 0; j < roster.list.length && SH.ids.length < 2; j++) {
+      if (SH.ids.indexOf(roster.list[j].id) === -1) shAddColumn(roster.list[j].id);
+    }
+    SH.rounds = SH.rounds.map(function (r) { return (typeof r === 'number' && r >= 0 && r < SH.ids.length) ? r : null; });
+    if (!SH.rounds.length) SH.rounds.push(null);
+    if (!SH.gid) SH.gid = gidNew();
+  }
+  fixSh();
+  saveSh();
+
+  function shMoveColumn(i, dir) {
+    var j = i + dir;
+    if (j < 0 || j >= SH.ids.length) return;
+    var t = SH.ids[i]; SH.ids[i] = SH.ids[j]; SH.ids[j] = t;
+    SH.rounds = SH.rounds.map(function (r) { return r === i ? j : (r === j ? i : r); });
+    saveSh();
+    shRender();
+  }
+
+  /* Wie oft war jeder Shithead? */
+  function shCounts() {
+    var c = SH.ids.map(function () { return 0; });
+    SH.rounds.forEach(function (r) { if (typeof r === 'number') c[r]++; });
+    return c;
+  }
+
+  var vShit = document.getElementById('view-shit');
+  var shpRules = document.getElementById('shpanel-rules');
+  var shpScore = document.getElementById('shpanel-score');
+  var shtRules = document.getElementById('shtab-rules');
+  var shtScore = document.getElementById('shtab-score');
+  var shRoot = document.getElementById('sh-root');
+  var shRefs = null;
+  var shPickerOpen = false;
+
+  function shChanged() {
+    saveSh();
+    if (typeof SH.rounds[SH.rounds.length - 1] === 'number') {
+      SH.rounds.push(null);
+      saveSh();
+      shRender();
+    } else {
+      shRefresh();
+    }
+  }
+
+  function shRender() {
+    var n = SH.ids.length;
+    shRefs = { rows: [], tot: [] };
+    shRoot.textContent = '';
+
+    var table = h('table', { class: 'score' });
+    table.appendChild(h('caption', { class: 'sr', text: 'Wertung Shithead' }));
+    var thead = h('thead');
+    var hr = h('tr');
+    hr.appendChild(h('th', { scope: 'col', class: 'rc', text: 'Runde' }));
+    SH.ids.forEach(function (id, p) {
+      var box = h('div', { class: 'ph' }, [avatarEl(player(id), ''), h('span', { class: 'pn', text: pname(id) }), mover(p, n, shMoveColumn)]);
+      if (n > 2) {
+        var rm = h('button', { type: 'button', class: 'mini' });
+        twoStep(rm, 'Entfernen', 'Sicher?', function () { shRemoveColumn(p); saveSh(); shRender(); });
+        box.appendChild(rm);
+      }
+      hr.appendChild(h('th', { scope: 'col' }, [box]));
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    var tbody = h('tbody');
+    SH.rounds.forEach(function (r, ri) {
+      var tr = h('tr', { class: 'round' });
+      tr.appendChild(h('th', { scope: 'row', class: 'rc', text: String(ri + 1) }));
+      var btns = [];
+      SH.ids.forEach(function (id, p) {
+        var b = h('button', { type: 'button', class: 'caller', text: 'Shithead', 'aria-pressed': 'false', 'aria-label': 'Shithead in Runde ' + (ri + 1) + ': ' + pname(id) });
+        b.addEventListener('click', function () {
+          SH.rounds[ri] = SH.rounds[ri] === p ? null : p;
+          shChanged();
+        });
+        tr.appendChild(h('td', null, [h('div', { class: 'cellrow' }, [b])]));
+        btns.push(b);
+      });
+      tbody.appendChild(tr);
+
+      var str = h('tr', { class: 'statusrow' });
+      var stext = h('span', { class: 'status' });
+      var del = h('button', { type: 'button', class: 'mini' });
+      twoStep(del, 'Runde löschen', 'Sicher?', function () {
+        if (SH.rounds.length > 1) SH.rounds.splice(ri, 1); else SH.rounds[0] = null;
+        saveSh(); shRender();
+      });
+      str.appendChild(h('td', { colspan: String(n + 1) }, [h('div', { class: 'statusin' }, [stext, del])]));
+      tbody.appendChild(str);
+      shRefs.rows.push({ btns: btns, status: stext });
+    });
+    table.appendChild(tbody);
+
+    var tfoot = h('tfoot');
+    var tr2 = h('tr');
+    tr2.appendChild(h('th', { scope: 'row', class: 'rc', text: 'Shithead' }));
+    for (var p = 0; p < n; p++) { var td = h('td'); tr2.appendChild(td); shRefs.tot.push(td); }
+    tfoot.appendChild(tr2);
+    table.appendChild(tfoot);
+    shRoot.appendChild(h('div', { class: 'table-wrap' }, [table]));
+
+    var actions = h('div', { class: 'actions' });
+    var addPlayer = h('button', { type: 'button', class: 'btn', text: 'Spieler hinzufügen', 'aria-expanded': shPickerOpen ? 'true' : 'false' });
+    if (n >= MAXG) addPlayer.disabled = true;
+    addPlayer.addEventListener('click', function () { shPickerOpen = !shPickerOpen; shRender(); });
+    var reset = h('button', { type: 'button', class: 'btn' });
+    twoStep(reset, 'Neue Wertung', 'Wirklich alle Runden löschen?', function () {
+      SH.rounds = [null];
+      SH.gid = gidNew();
+      saveSh(); shRender();
+    });
+    actions.appendChild(addPlayer);
+    actions.appendChild(reset);
+    shRoot.appendChild(actions);
+
+    if (shPickerOpen && n < MAXG) {
+      var avail = roster.list.filter(function (pl) { return SH.ids.indexOf(pl.id) === -1; });
+      var opts = h('div', { class: 'opts' });
+      avail.forEach(function (pl) {
+        var o = h('button', { type: 'button', class: 'opt' }, [avatarEl(pl, ''), (pl.name || '').trim() || 'Spieler']);
+        o.addEventListener('click', function () { shAddColumn(pl.id); shPickerOpen = false; saveSh(); shRender(); });
+        opts.appendChild(o);
+      });
+      shRoot.appendChild(h('div', { class: 'picker' }, [
+        h('p', { text: avail.length ? 'Wer soll mitspielen?' : 'Alle Spieler aus der Liste spielen schon mit.' }),
+        avail.length ? opts : null,
+        h('a', { href: '#spieler', text: 'Neuen Spieler anlegen →' })
+      ]));
+    }
+    shRefresh();
+  }
+
+  function shRefresh() {
+    var counts = shCounts();
+    recordSh(counts);
+    SH.rounds.forEach(function (r, ri) {
+      var row = shRefs.rows[ri];
+      row.btns.forEach(function (b, p) { b.setAttribute('aria-pressed', r === p ? 'true' : 'false'); });
+      if (typeof r === 'number') {
+        row.status.textContent = pname(SH.ids[r]) + ' ist Shithead und gibt die nächste Runde.';
+        row.status.className = 'status ok';
+      } else {
+        row.status.textContent = 'Wer ist Shithead?';
+        row.status.className = 'status';
+      }
+    });
+    counts.forEach(function (c, p) { shRefs.tot[p].textContent = String(c); });
+  }
+
+  /* ---------- Verlauf und Statistik ----------
+     Jedes Spiel hat eine gid. Ist es entschieden, wird es unter dieser gid im Verlauf abgelegt.
+     Korrigiert man danach die Tabelle, wird der Eintrag aktualisiert oder wieder entfernt.
+     "Neues Spiel" vergibt eine neue gid, der alte Eintrag bleibt. */
+  var K_H = 'spielebox.history.v1';
+  var hist = read(K_H);
+  if (!Array.isArray(hist)) hist = [];
+  hist = hist.filter(function (e) { return e && typeof e === 'object' && typeof e.gid === 'string' && Array.isArray(e.ids) && Array.isArray(e.winners); });
+  function saveHist() { write(K_H, hist); }
+  function gidNew() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  function histSet(gid, entry) {
+    var i = -1, k;
+    for (k = 0; k < hist.length; k++) if (hist[k].gid === gid) { i = k; break; }
+    if (!entry) {
+      if (i >= 0) { hist.splice(i, 1); saveHist(); }
+      return;
+    }
+    entry.gid = gid;
+    if (i >= 0) {
+      entry.ts = hist[i].ts;
+      if (JSON.stringify(entry) === JSON.stringify(hist[i])) return;
+      hist[i] = entry;
+    } else {
+      entry.ts = Date.now();
+      hist.push(entry);
+    }
+    saveHist();
+  }
+  function histEntry(kind, ids, winners, extra) {
+    var e = { game: kind, ids: ids.slice(), names: ids.map(pname), winners: winners };
+    Object.keys(extra).forEach(function (k) { e[k] = extra[k]; });
+    return e;
+  }
+
+  /* Yasif: Wer ueber 100 kommt, verliert. Gewonnen hat, wer dann die wenigsten Punkte hat. */
+  function recordYasif(sc) {
+    var entry = null;
+    if (sc.over) {
+      var t = sc.over.totals, min = Math.min.apply(null, t), w = [];
+      t.forEach(function (v, i) { if (v === min) w.push(i); });
+      entry = histEntry('yassif', game.ids, w, { losers: sc.over.losers.slice(), rounds: sc.over.round + 1 });
+    }
+    histSet(game.gid, entry);
+  }
+  function recordW(o) {
+    var entry = null;
+    if (o.over && o.winner !== null) {
+      entry = histEntry('wuerfeln', W.ids, [o.winner], { rounds: W.rounds.filter(function (r) { return r.some(filled); }).length });
+    }
+    histSet(W.gid, entry);
+  }
+  function recordS(o) {
+    var entry = null;
+    if (o.over) {
+      entry = histEntry('schwimmen', S.ids, o.winner !== null ? [o.winner] : [], { tie: o.tie ? o.tie.slice() : [], rounds: S.rounds.filter(sMarked).length });
+    }
+    histSet(S.gid, entry);
+  }
+  /* Shithead hat kein Spielende: jede markierte Runde zaehlt */
+  function recordSh(counts) {
+    var total = counts.reduce(function (a, b) { return a + b; }, 0);
+    var entry = total > 0 ? histEntry('shithead', SH.ids, [], { counts: counts.slice(), rounds: total }) : null;
+    histSet(SH.gid, entry);
+  }
+
+  var GAME_NAMES = { yassif: 'Yasif', wuerfeln: 'Würfeln', schwimmen: 'Schwimmen', shithead: 'Shithead' };
+  var vStats = document.getElementById('view-stats');
+  var statsRoot = document.getElementById('stats-root');
+
+  function joinNames(e, idxs) {
+    return idxs.map(function (i) { return (e.names && e.names[i]) || 'Spieler'; }).join(' und ');
+  }
+  function fmtDate(ts) {
+    try { return new Date(ts).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return ''; }
+  }
+
+  function renderStats() {
+    statsRoot.textContent = '';
+    var note = document.getElementById('stats-note');
+    note.textContent = storageOk
+      ? 'Die Statistik wird auf diesem Gerät gespeichert.'
+      : 'Speichern ist hier gerade nicht möglich. Die Statistik bleibt nur erhalten, solange diese Seite geöffnet ist.';
+    if (!hist.length) {
+      statsRoot.appendChild(h('p', { class: 'lede', text: 'Noch nichts da. Sobald ein Spiel entschieden ist, taucht es hier automatisch auf. Bei Shithead zählt jede Runde, in der du einen Verlierer markierst.' }));
+      return;
+    }
+
+    var agg = {};
+    hist.forEach(function (e) {
+      e.ids.forEach(function (id, i) {
+        var a = agg[id] || (agg[id] = { name: '', y: 0, w: 0, s: 0, played: 0, shLost: 0, shRounds: 0 });
+        a.name = player(id) ? pname(id) : ((e.names && e.names[i]) || 'Spieler');
+        if (e.game === 'shithead') {
+          a.shLost += (e.counts && e.counts[i]) || 0;
+          a.shRounds += e.rounds || 0;
+        } else {
+          a.played++;
+          if (e.winners.indexOf(i) !== -1) {
+            if (e.game === 'yassif') a.y++; else if (e.game === 'wuerfeln') a.w++; else if (e.game === 'schwimmen') a.s++;
+          }
+        }
+      });
+    });
+    var rows = Object.keys(agg).map(function (k) { return agg[k]; });
+    var cardRows = rows.filter(function (a) { return a.played > 0; });
+    cardRows.sort(function (a, b) { return (b.y + b.w + b.s) - (a.y + a.w + a.s) || a.name.localeCompare(b.name, 'de'); });
+
+    if (cardRows.length) {
+      var t = h('table', { class: 'stat' });
+      t.appendChild(h('caption', { class: 'sr', text: 'Siege pro Spieler' }));
+      var hr = h('tr');
+      ['Spieler', 'Yasif', 'Würfeln', 'Schwimmen', 'Siege'].forEach(function (c) { hr.appendChild(h('th', { scope: 'col', text: c })); });
+      t.appendChild(h('thead', null, [hr]));
+      var tb = h('tbody');
+      var top = Math.max.apply(null, cardRows.map(function (a) { return a.y + a.w + a.s; }));
+      cardRows.forEach(function (a) {
+        var sum = a.y + a.w + a.s;
+        var tr = h('tr');
+        tr.appendChild(h('th', { scope: 'row', text: a.name }));
+        [a.y, a.w, a.s].forEach(function (v) { tr.appendChild(h('td', { text: String(v) })); });
+        tr.appendChild(h('td', { class: sum > 0 && sum === top ? 'best' : '', text: sum + ' von ' + a.played }));
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb);
+      statsRoot.appendChild(h('div', { class: 'section roomy' }, [
+        h('h2', { text: 'Siege' }),
+        h('div', { class: 'table-wrap' }, [t]),
+        h('p', { class: 'note', text: 'Die letzte Spalte zeigt die Siege von allen gespielten Spielen. Bei Yasif gewinnt, wer nach dem Spielende die wenigsten Punkte hat. Unentschieden zählt nicht als Sieg.' })
+      ]));
+    }
+
+    var shRows = rows.filter(function (a) { return a.shRounds > 0; });
+    shRows.sort(function (a, b) { return b.shLost - a.shLost || a.name.localeCompare(b.name, 'de'); });
+    if (shRows.length) {
+      var t2 = h('table', { class: 'stat' });
+      t2.appendChild(h('caption', { class: 'sr', text: 'Shithead pro Spieler' }));
+      var hr2 = h('tr');
+      ['Spieler', 'Shithead', 'Runden'].forEach(function (c) { hr2.appendChild(h('th', { scope: 'col', text: c })); });
+      t2.appendChild(h('thead', null, [hr2]));
+      var tb2 = h('tbody');
+      shRows.forEach(function (a) {
+        var tr = h('tr');
+        tr.appendChild(h('th', { scope: 'row', text: a.name }));
+        tr.appendChild(h('td', { text: String(a.shLost) }));
+        tr.appendChild(h('td', { text: String(a.shRounds) }));
+        tb2.appendChild(tr);
+      });
+      t2.appendChild(tb2);
+      statsRoot.appendChild(h('div', { class: 'section roomy' }, [
+        h('h2', { text: 'Shithead' }),
+        h('div', { class: 'table-wrap' }, [t2]),
+        h('p', { class: 'note', text: 'Hier ist weniger besser: Gezählt wird, wie oft jemand Shithead war.' })
+      ]));
+    }
+
+    var list = h('div', { class: 'hist' });
+    hist.slice().sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); }).forEach(function (e) {
+      var line, extra = [];
+      if (e.game === 'shithead') {
+        var parts = [];
+        (e.counts || []).forEach(function (c, i) { if (c > 0) parts.push(((e.names && e.names[i]) || 'Spieler') + ' ' + c + '×'); });
+        line = 'Shithead in ' + e.rounds + (e.rounds === 1 ? ' Runde: ' : ' Runden: ') + parts.join(', ');
+      } else if (e.winners.length) {
+        line = (e.winners.length === 1 ? 'Gewinner: ' : 'Gewinner: ') + joinNames(e, e.winners);
+        if (e.game === 'yassif' && e.losers && e.losers.length) extra.push('Über 100 Punkte: ' + joinNames(e, e.losers));
+      } else {
+        line = 'Unentschieden: ' + joinNames(e, e.tie || []) + ' sind gleichzeitig ausgeschieden';
+      }
+      var meta = 'Mit ' + e.names.join(', ') + (e.game === 'shithead' ? '' : ' · ' + e.rounds + (e.rounds === 1 ? ' Runde' : ' Runden'));
+      list.appendChild(h('div', { class: 'hrow' }, [
+        h('div', { class: 'ht' }, [h('span', { text: GAME_NAMES[e.game] || 'Spiel' }), h('span', { class: 'hd', text: fmtDate(e.ts) })]),
+        h('div', { text: line }),
+        extra.length ? h('div', { class: 'hm', text: extra.join(' · ') }) : null,
+        h('div', { class: 'hm', text: meta })
+      ]));
+    });
+    statsRoot.appendChild(h('div', { class: 'section roomy' }, [h('h2', { text: 'Verlauf' }), list]));
+
+    var clear = h('button', { type: 'button', class: 'btn' });
+    twoStep(clear, 'Statistik löschen', 'Wirklich alles löschen?', function () {
+      hist = [];
+      /* laufende Spiele bekommen neue Kennungen, damit ein bereits beendetes Spiel nicht wieder auftaucht */
+      game.gid = gidNew(); W.gid = gidNew(); S.gid = gidNew(); SH.gid = gidNew();
+      saveGame(); saveW(); saveS(); saveSh(); saveHist();
+      renderStats();
+    });
+    statsRoot.appendChild(h('div', { class: 'actions' }, [clear]));
+  }
+
+  /* ---------- Navigation ueber den Hash: "", "yassif", "yassif-punkte", "wuerfeln", "wuerfeln-punkte", "schwimmen", "schwimmen-punkte", "shithead", "shithead-wertung", "statistik", "hilfe", "spieler" ---------- */
+  var vHome = document.getElementById('view-home');
+  var vYas = document.getElementById('view-yassif');
+  var vPl = document.getElementById('view-players');
+  var vHelp = document.getElementById('view-help');
+  var pRules = document.getElementById('panel-rules');
+  var pScore = document.getElementById('panel-score');
+  var tRules = document.getElementById('tab-rules');
+  var tScore = document.getElementById('tab-score');
+
+  function route() {
+    var hash = location.hash.replace(/^#/, '');
+    var inGame = hash === 'yassif' || hash === 'yassif-punkte';
+    var score = hash === 'yassif-punkte';
+    var inPl = hash === 'spieler';
+    var inDice = hash === 'wuerfeln' || hash === 'wuerfeln-punkte';
+    var dScore = hash === 'wuerfeln-punkte';
+    var inSwim = hash === 'schwimmen' || hash === 'schwimmen-punkte';
+    var sScore = hash === 'schwimmen-punkte';
+    var inShit = hash === 'shithead' || hash === 'shithead-wertung';
+    var shScore = hash === 'shithead-wertung';
+    var inHelp = hash === 'hilfe';
+    var inStats = hash === 'statistik';
+    vHome.hidden = inGame || inPl || inDice || inSwim || inShit || inHelp || inStats;
+    vYas.hidden = !inGame;
+    vDice.hidden = !inDice;
+    vSwim.hidden = !inSwim;
+    vShit.hidden = !inShit;
+    vHelp.hidden = !inHelp;
+    vStats.hidden = !inStats;
+    vPl.hidden = !inPl;
+    dpRules.hidden = dScore;
+    dpScore.hidden = !dScore;
+    spRules.hidden = sScore;
+    spScore.hidden = !sScore;
+    shpRules.hidden = shScore;
+    shpScore.hidden = !shScore;
+    if (dScore) { dtScore.setAttribute('aria-current', 'page'); dtRules.removeAttribute('aria-current'); }
+    else { dtRules.setAttribute('aria-current', 'page'); dtScore.removeAttribute('aria-current'); }
+    if (sScore) { stScore.setAttribute('aria-current', 'page'); stRules.removeAttribute('aria-current'); }
+    else { stRules.setAttribute('aria-current', 'page'); stScore.removeAttribute('aria-current'); }
+    if (shScore) { shtScore.setAttribute('aria-current', 'page'); shtRules.removeAttribute('aria-current'); }
+    else { shtRules.setAttribute('aria-current', 'page'); shtScore.removeAttribute('aria-current'); }
+    pRules.hidden = score;
+    pScore.hidden = !score;
+    if (score) { tScore.setAttribute('aria-current', 'page'); tRules.removeAttribute('aria-current'); }
+    else { tRules.setAttribute('aria-current', 'page'); tScore.removeAttribute('aria-current'); }
+    if (score) { pickerOpen = false; render(); }
+    else if (dScore) { wPickerOpen = false; renderWScore(); }
+    else if (sScore) { sPickerOpen = false; sRender(); }
+    else if (shScore) { shPickerOpen = false; shRender(); }
+    else if (inStats) { renderStats(); }
+    else if (inPl) { rosterMsg.textContent = ''; renderRoster(); }
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('hashchange', route);
+  updateNotes();
+  applyAdv();
+  route();
+})();
+</script>
+</body>
+</html>
